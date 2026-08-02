@@ -1312,7 +1312,7 @@
           <div>
             <div class="panel-label"><span>AI summary</span>
               <button id="btnSummarize" class="mode-btn" style="padding:5px 12px; font-size:11px;" disabled>Generate</button>
-              <button id="btnUnlock" class="mode-btn" style="padding:5px 12px; font-size:11px; display:none;">Unlock AI Summaries — $5</button>
+              <button id="btnUnlock" class="mode-btn" style="padding:5px 12px; font-size:11px; display:none;">Unlock AI Summaries — ₹399</button>
             </div>
             <div class="summary-box" id="summaryBox"><span class="placeholder">Record something with a transcript, then generate a short AI summary and action items.</span></div>
           </div>
@@ -3310,41 +3310,74 @@
 
   btnUnlock.onclick = async ()=>{
     btnUnlock.disabled = true;
-    btnUnlock.textContent = 'Redirecting…';
+    btnUnlock.textContent = 'Loading…';
     try{
       const resp = await fetch('/.netlify/functions/create-checkout-session', { method: 'POST' });
       if(!resp.ok) throw new Error('status ' + resp.status);
-      const { url } = await resp.json();
-      window.location.href = url;
+      const { orderId, amount, currency, keyId } = await resp.json();
+
+      if(!window.Razorpay){
+        await new Promise((resolve, reject)=>{
+          const s = document.createElement('script');
+          s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          s.onload = resolve;
+          s.onerror = ()=> reject(new Error('Could not load payment popup'));
+          document.head.appendChild(s);
+        });
+      }
+
+      const rzp = new window.Razorpay({
+        key: keyId,
+        amount: amount,
+        currency: currency,
+        order_id: orderId,
+        name: 'Aaryan Softworks',
+        description: 'AI Summary Unlock — FreeScreenRecording',
+        handler: async function(response){
+          summaryBox.className = 'summary-box';
+          summaryBox.innerHTML = '<span class="placeholder">Confirming your purchase…</span>';
+          try{
+            const verifyResp = await fetch('/.netlify/functions/verify-session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            if(!verifyResp.ok) throw new Error('verification failed');
+            const { token, expires } = await verifyResp.json();
+            setUnlockToken(token, expires);
+            summaryBox.innerHTML = '<span class="placeholder">AI Summaries unlocked. Record something with a transcript, then hit Generate.</span>';
+          }catch{
+            summaryBox.innerHTML = '<span class="placeholder">We couldn\'t confirm that payment. If you were charged, contact support and we\'ll sort it out.</span>';
+          }finally{
+            refreshUnlockUI();
+          }
+        },
+        modal: {
+          ondismiss: function(){
+            btnUnlock.disabled = false;
+            btnUnlock.textContent = 'Unlock AI Summaries — ₹399';
+          }
+        },
+        theme: { color: '#2EAA8C' }
+      });
+      rzp.on('payment.failed', function(){
+        summaryBox.className = 'summary-box';
+        summaryBox.innerHTML = '<span class="placeholder">Payment failed. No charge was made — feel free to try again.</span>';
+      });
+      rzp.open();
+      btnUnlock.disabled = false;
+      btnUnlock.textContent = 'Unlock AI Summaries — ₹399';
     }catch(err){
       btnUnlock.disabled = false;
-      btnUnlock.textContent = 'Unlock AI Summaries — $5';
+      btnUnlock.textContent = 'Unlock AI Summaries — ₹399';
       summaryBox.className = 'summary-box';
       summaryBox.innerHTML = '<span class="placeholder">Couldn\'t start checkout right now. Please try again in a moment.</span>';
     }
   };
-
-  // If we just came back from Stripe (?session_id=...), verify and store the unlock token.
-  (async function handleCheckoutReturn(){
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('session_id');
-    if(!sessionId) return;
-    summaryBox.className = 'summary-box';
-    summaryBox.innerHTML = '<span class="placeholder">Confirming your purchase…</span>';
-    try{
-      const resp = await fetch('/.netlify/functions/verify-session?session_id=' + encodeURIComponent(sessionId));
-      if(!resp.ok) throw new Error('verification failed');
-      const { token, expires } = await resp.json();
-      setUnlockToken(token, expires);
-      summaryBox.innerHTML = '<span class="placeholder">AI Summaries unlocked. Record something with a transcript, then hit Generate.</span>';
-    }catch{
-      summaryBox.innerHTML = '<span class="placeholder">We couldn\'t confirm that payment. If you were charged, contact support and we\'ll sort it out.</span>';
-    }finally{
-      // Clean the session_id out of the URL so refreshes don't re-trigger this.
-      window.history.replaceState({}, '', window.location.pathname);
-      refreshUnlockUI();
-    }
-  })();
 
   async function summarize(rec){
     if(!rec.transcript){
