@@ -1,7 +1,7 @@
 // netlify/functions/summarize.js
 //
 // The paid-only AI summary endpoint. Verifies the unlock token the browser
-// sends, then calls Anthropic server-side (API key never touches the browser).
+// sends, then calls OpenRouter server-side (API key never touches the browser).
 
 const crypto = require('crypto');
 
@@ -43,16 +43,14 @@ exports.handler = async (event) => {
   }
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
+        model: 'google/gemini-2.0-flash-exp:free',
         messages: [
           {
             role: 'user',
@@ -64,16 +62,12 @@ exports.handler = async (event) => {
 
     if (!resp.ok) {
       const errText = await resp.text();
-      console.error('Anthropic API error:', resp.status, errText);
+      console.error('OpenRouter API error:', resp.status, errText);
       return { statusCode: 502, body: JSON.stringify({ error: 'AI provider error' }) };
     }
 
     const data = await resp.json();
-    const text = (data.content || [])
-      .filter((b) => b.type === 'text')
-      .map((b) => b.text)
-      .join('\n')
-      .trim();
+    const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content || '').trim();
 
     return {
       statusCode: 200,
