@@ -1013,7 +1013,59 @@
   background:var(--ink); border:1px solid var(--line-strong); border-radius:8px; color:var(--paper);
   padding:7px 10px; font-family:'Manrope',sans-serif; font-size:12.5px;
 }
+/* ---------- AUTH MODAL ---------- */
+.auth-modal-backdrop{
+  display:none; position:fixed; inset:0; z-index:200; background:rgba(6,7,10,0.7);
+  align-items:center; justify-content:center; padding:20px;
+}
+.auth-modal-backdrop.show{ display:flex; }
+.auth-modal{
+  width:100%; max-width:380px; background:var(--ink-2); border:1px solid var(--line-strong);
+  border-radius:16px; padding:32px; position:relative; box-shadow:var(--shadow-lift);
+}
+.auth-modal-close{
+  position:absolute; top:14px; right:16px; background:none; border:none; color:var(--paper-dim);
+  font-size:22px; cursor:pointer; line-height:1;
+}
+.auth-modal-close:hover{ color:var(--paper); }
+.auth-tabs{ display:flex; gap:4px; margin-bottom:22px; background:var(--ink); border-radius:10px; padding:4px; }
+.auth-tab{
+  flex:1; padding:9px; border:none; background:transparent; border-radius:8px; cursor:pointer;
+  font-family:'Manrope',sans-serif; font-weight:700; font-size:13px; color:var(--paper-dim); transition:all .2s ease;
+}
+.auth-tab.active{ background:var(--accent); color:var(--ink); }
+.auth-field{ display:block; margin-bottom:14px; }
+.auth-field span{ display:block; font-size:12.5px; color:var(--paper-dim); margin-bottom:6px; font-family:'JetBrains Mono',monospace; }
+.auth-field input{
+  width:100%; background:var(--ink); border:1px solid var(--line-strong); border-radius:9px; color:var(--paper);
+  padding:11px 13px; font-family:'Manrope',sans-serif; font-size:14px;
+}
+.auth-field input:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+.auth-status{ margin-top:12px; font-size:12.5px; color:var(--paper-dim); text-align:center; min-height:16px; }
+.auth-status.error{ color:#F0928A; }
+.auth-status.ok{ color:var(--accent); }
+.auth-fineprint{ margin-top:18px; font-size:11.5px; color:var(--paper-dim); line-height:1.5; text-align:center; }
+
+/* ---------- DASHBOARD ---------- */
+.dash-card{
+  display:flex; gap:14px; align-items:center; padding:14px 16px; border:1px solid var(--line);
+  border-radius:12px; background:var(--ink-2); margin-bottom:10px;
+}
+.dash-thumb{
+  width:64px; height:44px; border-radius:8px; background:var(--ink); flex:none;
+  display:flex; align-items:center; justify-content:center; color:var(--accent); font-size:18px;
+}
+.dash-meta{ flex:1; min-width:0; }
+.dash-meta .name{ font-weight:700; font-size:14.5px; color:var(--paper); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dash-meta .sub{ font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--paper-dim); margin-top:3px; }
+.dash-status{
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent);
+  padding:4px 10px; border-radius:999px; border:1px solid rgba(46,170,140,0.3); background:rgba(46,170,140,0.08); flex:none;
+}
+.dash-empty{ padding:40px 20px; text-align:center; color:var(--paper-dim); font-size:14px; }
+.dash-signedout{ padding:40px 20px; text-align:center; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body id="top">
 
@@ -1029,9 +1081,40 @@
       <a href="#trust">Security</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a href="#studio" class="btn btn-primary">Start free</a>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="btn btn-ghost" id="btnAuthOpen" style="font-size:13.5px; padding:9px 18px;">Sign in</button>
+      <div id="authUserMenu" style="display:none; align-items:center; gap:10px;">
+        <a href="#dashboard" class="btn btn-ghost" style="font-size:13.5px; padding:9px 16px;">Dashboard</a>
+        <span id="authUserEmail" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--paper-dim); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+        <button class="btn btn-ghost" id="btnSignOut" style="font-size:12.5px; padding:8px 14px;">Sign out</button>
+      </div>
+      <a href="#studio" class="btn btn-primary">Start free</a>
+    </div>
   </div>
 </header>
+
+<div class="auth-modal-backdrop" id="authModal">
+  <div class="auth-modal">
+    <button class="auth-modal-close" id="authModalClose" aria-label="Close">&times;</button>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-authtab="login">Sign in</button>
+      <button class="auth-tab" data-authtab="signup">Create account</button>
+    </div>
+    <form id="authForm">
+      <label class="auth-field">
+        <span>Email</span>
+        <input type="email" id="authEmail" required autocomplete="email">
+      </label>
+      <label class="auth-field">
+        <span>Password</span>
+        <input type="password" id="authPassword" required minlength="6" autocomplete="current-password">
+      </label>
+      <button type="submit" class="btn btn-primary" id="authSubmit" style="width:100%; justify-content:center; margin-top:6px;">Sign in</button>
+    </form>
+    <div class="auth-status" id="authStatus"></div>
+    <p class="auth-fineprint">Recordings you save while signed in sync to your account and stay available across devices. Local demo recordings above stay in this browser only.</p>
+  </div>
+</div>
 
 <section class="hero">
   <div class="wrap">
@@ -1367,6 +1450,32 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="dashboard">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Your account</span>
+      <h2>Recordings, synced to you.</h2>
+      <p>Sign in to save recordings to your account so they're there next time you visit — from any device.</p>
+    </div>
+    <div class="studio-shell reveal">
+      <div class="studio-head">
+        <div>
+          <h3 id="dashHeading">Home</h3>
+          <p id="dashSub">Sign in to see recordings saved to your account.</p>
+        </div>
+        <span class="studio-badge"><span class="sdot"></span><span id="dashCount">0 saved</span></span>
+      </div>
+      <div class="studio-body" style="padding-top:22px;">
+        <div id="dashSignedOut" class="dash-signedout">
+          <p style="color:var(--paper-dim); margin-bottom:18px;">You're not signed in — recordings you save here stay local to this browser only.</p>
+          <button class="btn btn-primary" id="btnDashSignIn">Sign in to sync recordings</button>
+        </div>
+        <div id="dashList" style="display:none;"></div>
       </div>
     </div>
   </div>
@@ -1711,6 +1820,16 @@
 (function(){
   'use strict';
 
+  // ---------- Supabase config ----------
+  // Replace with your own project's values (Supabase Dashboard → Project Settings → API).
+  // The anon key is meant to be public — real access control lives in Row Level Security
+  // policies (see docs/supabase-schema.sql), not in keeping this key secret.
+  const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
+  const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+  const supabaseReady = !SUPABASE_URL.includes('YOUR-PROJECT') && typeof window.supabase !== 'undefined';
+  const sb = supabaseReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  let currentUser = null;
+
   // ---------- element refs ----------
   const modeRow      = document.getElementById('modeRow');
   const micOnBtn = document.getElementById('micOnBtn');
@@ -1753,6 +1872,23 @@
   const commentTimeLabel = document.getElementById('commentTimeLabel');
   const timerSelect      = document.getElementById('timerSelect');
   const timerBadge       = document.getElementById('timerBadge');
+  const btnAuthOpen      = document.getElementById('btnAuthOpen');
+  const authModal        = document.getElementById('authModal');
+  const authModalClose   = document.getElementById('authModalClose');
+  const authForm         = document.getElementById('authForm');
+  const authEmail        = document.getElementById('authEmail');
+  const authPassword     = document.getElementById('authPassword');
+  const authSubmit       = document.getElementById('authSubmit');
+  const authStatus       = document.getElementById('authStatus');
+  const authUserMenu     = document.getElementById('authUserMenu');
+  const authUserEmail    = document.getElementById('authUserEmail');
+  const btnSignOut       = document.getElementById('btnSignOut');
+  const btnDashSignIn    = document.getElementById('btnDashSignIn');
+  const dashSignedOut    = document.getElementById('dashSignedOut');
+  const dashList         = document.getElementById('dashList');
+  const dashCount        = document.getElementById('dashCount');
+  const dashSub          = document.getElementById('dashSub');
+  let authMode = 'login';
 
   let mode = 'screen';
   let micWanted = true;
@@ -3075,6 +3211,7 @@
     renderComments(rec);
     refreshTimerBadge(rec);
     timerSelect.value = '';
+    syncRecordingToCloud(rec);
     if(hasVideo){
       captureThumbnail(url).then(dataUrl=>{
         rec.thumbnail = dataUrl;
@@ -3548,6 +3685,143 @@
     });
     startAutoRotate();
   })();
+
+  // ---------- auth ----------
+  function openAuthModal(){ authModal.classList.add('show'); authStatus.textContent=''; authStatus.className='auth-status'; }
+  function closeAuthModal(){ authModal.classList.remove('show'); authForm.reset(); }
+
+  btnAuthOpen.onclick = openAuthModal;
+  btnDashSignIn.onclick = openAuthModal;
+  authModalClose.onclick = closeAuthModal;
+  authModal.addEventListener('click', (e)=>{ if(e.target === authModal) closeAuthModal(); });
+
+  document.querySelectorAll('.auth-tab').forEach(tab=>{
+    tab.onclick = ()=>{
+      document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      authMode = tab.dataset.authtab;
+      authSubmit.textContent = authMode === 'signup' ? 'Create account' : 'Sign in';
+      authStatus.textContent=''; authStatus.className='auth-status';
+    };
+  });
+
+  authForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if(!supabaseReady){
+      authStatus.className = 'auth-status error';
+      authStatus.textContent = 'Accounts aren\'t configured yet on this deployment — see docs/DEPLOYMENT_GUIDE.md to set up Supabase.';
+      return;
+    }
+    authSubmit.disabled = true;
+    authStatus.className = 'auth-status';
+    authStatus.textContent = authMode === 'signup' ? 'Creating account…' : 'Signing in…';
+    try{
+      const email = authEmail.value.trim();
+      const password = authPassword.value;
+      const { data, error } = authMode === 'signup'
+        ? await sb.auth.signUp({ email, password })
+        : await sb.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      if(authMode === 'signup' && data.user && !data.session){
+        authStatus.className = 'auth-status ok';
+        authStatus.textContent = 'Check your email to confirm your account, then sign in.';
+        authSubmit.disabled = false;
+        return;
+      }
+      authStatus.className = 'auth-status ok';
+      authStatus.textContent = 'Signed in.';
+      setTimeout(closeAuthModal, 500);
+    }catch(err){
+      authStatus.className = 'auth-status error';
+      authStatus.textContent = err.message || 'Something went wrong. Please try again.';
+    }finally{
+      authSubmit.disabled = false;
+    }
+  });
+
+  btnSignOut.onclick = async ()=>{
+    if(sb) await sb.auth.signOut();
+  };
+
+  function refreshAuthUI(user){
+    currentUser = user;
+    if(user){
+      btnAuthOpen.style.display = 'none';
+      authUserMenu.style.display = 'flex';
+      authUserEmail.textContent = user.email;
+      dashSignedOut.style.display = 'none';
+      dashList.style.display = 'block';
+      dashSub.textContent = 'All recordings you save while signed in show up here.';
+      loadDashboard();
+    } else {
+      btnAuthOpen.style.display = 'inline-flex';
+      authUserMenu.style.display = 'none';
+      dashSignedOut.style.display = 'block';
+      dashList.style.display = 'none';
+      dashCount.textContent = '0 saved';
+    }
+  }
+
+  if(supabaseReady){
+    sb.auth.getSession().then(({ data })=> refreshAuthUI(data.session ? data.session.user : null));
+    sb.auth.onAuthStateChange((_event, session)=> refreshAuthUI(session ? session.user : null));
+  }
+
+  // ---------- cloud sync ----------
+  async function syncRecordingToCloud(rec){
+    if(!supabaseReady || !currentUser) return;
+    try{
+      const path = `${currentUser.id}/${rec.id}-${Date.now()}.webm`;
+      const { error: upErr } = await sb.storage.from('recordings').upload(path, rec.blob, { contentType: rec.blob.type || 'video/webm' });
+      if(upErr) throw upErr;
+      const { error: dbErr } = await sb.from('recordings').insert({
+        user_id: currentUser.id,
+        name: rec.name,
+        mode: rec.mode,
+        duration: rec.duration,
+        size: rec.size,
+        has_video: rec.hasVideo,
+        resolution: rec.resolution,
+        transcript: rec.transcript || '',
+        comments: rec.comments || [],
+        deadline_at: rec.deadlineAt ? new Date(rec.deadlineAt).toISOString() : null,
+        storage_path: path
+      });
+      if(dbErr) throw dbErr;
+      loadDashboard();
+    }catch(err){
+      console.error('Cloud sync failed:', err);
+    }
+  }
+
+  async function loadDashboard(){
+    if(!supabaseReady || !currentUser) return;
+    const { data, error } = await sb
+      .from('recordings')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+    if(error){ console.error('Dashboard load failed:', error); return; }
+    dashCount.textContent = data.length + ' saved';
+    if(data.length === 0){
+      dashList.innerHTML = '<div class="dash-empty">Nothing saved to your account yet — recordings you make while signed in will land here.</div>';
+      return;
+    }
+    dashList.innerHTML = '';
+    data.forEach(row=>{
+      const card = document.createElement('div');
+      card.className = 'dash-card';
+      card.innerHTML = `
+        <div class="dash-thumb">${row.has_video ? '▶' : '♪'}</div>
+        <div class="dash-meta">
+          <div class="name">${escapeHtml(row.name)}</div>
+          <div class="sub">${row.duration} · ${row.size} · ${new Date(row.created_at).toLocaleString()}</div>
+        </div>
+        <span class="dash-status">Ready to share</span>
+      `;
+      dashList.appendChild(card);
+    });
+  }
 
   refreshUnlockUI();
   if(libFilter) libFilter.addEventListener('change', renderLibrary);

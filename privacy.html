@@ -57,36 +57,40 @@
   <div class="updated">Last updated: August 2, 2026</div>
 
   <div class="disclaimer">
-    <b>Before you rely on this:</b> this policy was drafted to accurately describe what FreeScreenRecording's code actually does as of this date. It is a starting point, not a substitute for a lawyer. If you have users in the EU (GDPR), California (CCPA/CPRA), or other regulated regions, or once you add ads or accounts, have this reviewed and updated by a qualified professional before relying on it.
+    <b>Before you rely on this:</b> this policy was drafted to accurately describe what FreeScreenRecording's code actually does as of this date, including the optional account feature added in this update. It is a starting point, not a substitute for a lawyer. If you have users in the EU (GDPR), California (CCPA/CPRA), or other regulated regions, or once you add ads, have this reviewed and updated by a qualified professional before relying on it.
   </div>
 
   <h2>What this site is</h2>
-  <p>FreeScreenRecording (freescreenrecording.net) is a free, browser-based screen recorder. There are no user accounts. You don't sign up, and we don't know who you are unless you choose to pay for the AI Summary feature, in which case Stripe handles that transaction.</p>
+  <p>FreeScreenRecording (freescreenrecording.net) is a free, browser-based screen recorder. Creating an account is optional — you can record, download, and use most features without signing up. We only know who you are if you choose to create an account, or if you pay for the AI Summary feature (in which case Razorpay handles that transaction).</p>
 
   <h2>Recordings and transcripts</h2>
-  <p>Your screen, camera, and audio recordings are captured and stored entirely inside your browser tab using your browser's built-in recording tools. We never receive or store your recordings on our servers. When you close or refresh the tab, recordings are gone — there's no cloud copy.</p>
-  <p>Live transcription, where your browser supports it, also happens locally in your browser. It is not sent anywhere unless you use the paid AI Summary feature described below.</p>
+  <p>Your screen, camera, and audio recordings are captured and stored entirely inside your browser tab using your browser's built-in recording tools. If you are not signed in, we never receive or store your recordings on our servers — when you close or refresh the tab, recordings are gone, with no cloud copy. If you choose to sign in, new recordings are automatically uploaded to your private, password-protected account storage (provided by Supabase) so they're available across devices — see "Optional accounts" below.</p>
+  <p>Live transcription, where your browser supports it, also happens locally in your browser. It is not sent anywhere unless you use the paid AI Summary feature described below, or you're signed in (in which case the transcript text is saved as part of your synced recording).</p>
+
+  <h2>Optional accounts</h2>
+  <p>If you choose to create an account (email + password), we store your email address and the recordings, transcripts, comments, and timers you've saved while signed in, using Supabase as our authentication and database provider. Each account's data is isolated at the database level so only you can access your own recordings. You can stop syncing at any time simply by not signing in — the free recorder works fully without an account.</p>
 
   <h2>The paid AI Summary feature</h2>
-  <p>If you purchase and use the AI Summary unlock, the transcript text you submit is sent from your browser to our server, which forwards it to Anthropic's Claude API to generate a summary, and returns the result to you. We do not store that transcript or the resulting summary on our servers — it passes through only to generate your response. Anthropic processes it under its own privacy terms.</p>
+  <p>If you purchase and use the AI Summary unlock, the transcript text you submit is sent from your browser to our server, which forwards it to an AI model (via OpenRouter, currently Google's Gemini) to generate a summary, and returns the result to you. We do not separately store that transcript or summary beyond what's described above for signed-in accounts — it passes through only to generate your response. OpenRouter and the underlying model provider process it under their own privacy terms.</p>
 
   <h2>Payments</h2>
-  <p>All payments are processed by Stripe. We never see, receive, or store your card number or other payment details — Stripe handles that directly. After a successful payment, our server issues a signed access token that your browser stores locally to unlock the AI Summary feature. That token isn't tied to your name, email, or any account — just to the payment.</p>
+  <p>All payments are processed by Razorpay. We never see, receive, or store your card number or other payment details — Razorpay handles that directly. After a successful payment, our server issues a signed access token that your browser stores locally to unlock the AI Summary feature. That token isn't tied to your name, email, or any account — just to the payment.</p>
 
   <h2>Cookies and local storage</h2>
-  <p>We use your browser's local storage to remember your AI Summary unlock token. We do not currently use tracking or advertising cookies. If that changes (for example, if we add display ads in the future), this policy will be updated to disclose which third parties are involved and how to opt out.</p>
+  <p>We use your browser's local storage to remember your AI Summary unlock token and, if you're signed in, your account session. We do not currently use tracking or advertising cookies. If that changes (for example, if we add display ads in the future), this policy will be updated to disclose which third parties are involved and how to opt out.</p>
 
   <h2>What we don't do</h2>
   <ul>
-    <li>We don't require or ask for an account, email, or personal profile.</li>
-    <li>We don't upload your recordings anywhere automatically.</li>
-    <li>We don't sell personal data, because we don't collect any in the normal course of using the free recorder.</li>
+    <li>We don't require an account, email, or personal profile to use the free recorder — accounts are entirely optional.</li>
+    <li>We don't upload your recordings anywhere unless you've chosen to sign in.</li>
+    <li>We don't sell personal data.</li>
   </ul>
 
   <h2>Third-party services we use</h2>
   <ul>
-    <li><strong>Stripe</strong> — payment processing</li>
-    <li><strong>Anthropic (Claude API)</strong> — generates AI summaries, only when you use that paid feature</li>
+    <li><strong>Razorpay</strong> — payment processing</li>
+    <li><strong>OpenRouter (Google Gemini)</strong> — generates AI summaries, only when you use that paid feature</li>
+    <li><strong>Supabase</strong> — authentication and storage for the optional account feature</li>
     <li><strong>Netlify</strong> — hosting; like most hosts, it may log standard technical data (e.g. IP address, browser type) for security and performance purposes</li>
   </ul>
 
