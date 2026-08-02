@@ -1824,8 +1824,8 @@
   // Replace with your own project's values (Supabase Dashboard → Project Settings → API).
   // The anon key is meant to be public — real access control lives in Row Level Security
   // policies (see docs/supabase-schema.sql), not in keeping this key secret.
-  const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
-  const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+  const SUPABASE_URL = 'https://iwctleyslwvdotzzvdsg.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_pnlStvNN01y5BuCUBIFxYQ_N2QBiHHp';
   const supabaseReady = !SUPABASE_URL.includes('YOUR-PROJECT') && typeof window.supabase !== 'undefined';
   const sb = supabaseReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
   let currentUser = null;
