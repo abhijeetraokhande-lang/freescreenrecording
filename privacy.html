@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — FreeScreenRecording</title>
+<meta name="description" content="How FreeScreenRecording handles your recordings, transcripts, and payment data.">
+<link rel="canonical" href="https://freescreenrecording.net/privacy.html">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0B10; --ink-2:#14171D; --paper:#F1EEE7; --paper-dim:#9B9890;
+    --accent:#2EAA8C; --line:rgba(241,238,231,0.12); --line-strong:rgba(241,238,231,0.22);
+    --max:820px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--ink); color:var(--paper); font-family:'Manrope',sans-serif; line-height:1.7; -webkit-font-smoothing:antialiased;}
+  a{color:var(--accent); text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 24px;}
+  header.nav{position:sticky; top:0; z-index:50; background:rgba(11,14,20,0.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+  .nav-inner{display:flex; align-items:center; justify-content:space-between; max-width:1180px; margin:0 auto; padding:18px 32px;}
+  .logo{display:flex; align-items:center; gap:10px; font-family:'Instrument Serif',serif; font-weight:600; font-size:18px;}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);}
+  .back{font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--paper-dim);}
+  main{padding:64px 0 100px;}
+  h1{font-family:'Instrument Serif',serif; font-weight:500; font-size:clamp(32px,5vw,44px); letter-spacing:-0.015em; margin-bottom:8px;}
+  .updated{font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--paper-dim); margin-bottom:36px;}
+  .disclaimer{
+    border:1px dashed var(--line-strong); border-radius:12px; padding:16px 20px;
+    font-size:13.5px; color:var(--paper-dim); margin-bottom:44px; line-height:1.6;
+  }
+  .disclaimer b{color:var(--paper);}
+  h2{font-family:'Instrument Serif',serif; font-weight:500; font-size:22px; margin:38px 0 12px; letter-spacing:-0.01em;}
+  p{color:var(--paper-dim); font-size:15px; margin-bottom:14px;}
+  ul{margin:0 0 14px 20px; color:var(--paper-dim); font-size:15px;}
+  li{margin-bottom:8px;}
+  strong{color:var(--paper);}
+  footer{border-top:1px solid var(--line); padding:28px 0; text-align:center;}
+  footer p{font-size:13px; color:var(--paper-dim); margin:0;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="dot"></span>FreeScreenRecording</a>
+    <a href="index.html" class="back">← Back to site</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Privacy Policy</h1>
+  <div class="updated">Last updated: August 2, 2026</div>
+
+  <div class="disclaimer">
+    <b>Before you rely on this:</b> this policy was drafted to accurately describe what FreeScreenRecording's code actually does as of this date. It is a starting point, not a substitute for a lawyer. If you have users in the EU (GDPR), California (CCPA/CPRA), or other regulated regions, or once you add ads or accounts, have this reviewed and updated by a qualified professional before relying on it.
+  </div>
+
+  <h2>What this site is</h2>
+  <p>FreeScreenRecording (freescreenrecording.net) is a free, browser-based screen recorder. There are no user accounts. You don't sign up, and we don't know who you are unless you choose to pay for the AI Summary feature, in which case Stripe handles that transaction.</p>
+
+  <h2>Recordings and transcripts</h2>
+  <p>Your screen, camera, and audio recordings are captured and stored entirely inside your browser tab using your browser's built-in recording tools. We never receive or store your recordings on our servers. When you close or refresh the tab, recordings are gone — there's no cloud copy.</p>
+  <p>Live transcription, where your browser supports it, also happens locally in your browser. It is not sent anywhere unless you use the paid AI Summary feature described below.</p>
+
+  <h2>The paid AI Summary feature</h2>
+  <p>If you purchase and use the AI Summary unlock, the transcript text you submit is sent from your browser to our server, which forwards it to Anthropic's Claude API to generate a summary, and returns the result to you. We do not store that transcript or the resulting summary on our servers — it passes through only to generate your response. Anthropic processes it under its own privacy terms.</p>
+
+  <h2>Payments</h2>
+  <p>All payments are processed by Stripe. We never see, receive, or store your card number or other payment details — Stripe handles that directly. After a successful payment, our server issues a signed access token that your browser stores locally to unlock the AI Summary feature. That token isn't tied to your name, email, or any account — just to the payment.</p>
+
+  <h2>Cookies and local storage</h2>
+  <p>We use your browser's local storage to remember your AI Summary unlock token. We do not currently use tracking or advertising cookies. If that changes (for example, if we add display ads in the future), this policy will be updated to disclose which third parties are involved and how to opt out.</p>
+
+  <h2>What we don't do</h2>
+  <ul>
+    <li>We don't require or ask for an account, email, or personal profile.</li>
+    <li>We don't upload your recordings anywhere automatically.</li>
+    <li>We don't sell personal data, because we don't collect any in the normal course of using the free recorder.</li>
+  </ul>
+
+  <h2>Third-party services we use</h2>
+  <ul>
+    <li><strong>Stripe</strong> — payment processing</li>
+    <li><strong>Anthropic (Claude API)</strong> — generates AI summaries, only when you use that paid feature</li>
+    <li><strong>Netlify</strong> — hosting; like most hosts, it may log standard technical data (e.g. IP address, browser type) for security and performance purposes</li>
+  </ul>
+
+  <h2>Children's privacy</h2>
+  <p>This site is not directed at children, and we do not knowingly collect personal information from children.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If how we handle data changes — for example, if we introduce accounts, cloud storage, or advertising — we'll update this page and the "last updated" date above.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy: <a href="mailto:privacy@freescreenrecording.net">privacy@freescreenrecording.net</a></p>
+</main>
+
+<footer>
+  <p>© 2026 FreeScreenRecording · <a href="terms.html">Terms of Service</a></p>
+</footer>
+
+</body>
+</html>

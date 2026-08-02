@@ -1,0 +1,3527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreeScreenRecording — Free Screen Recorder, Right In Your Browser</title>
+<meta name="description" content="Record your screen, tab, camera, or audio for free — no install, no account. Live transcript, timestamped comments, and instant download as .webm, right in your browser.">
+<link rel="canonical" href="https://freescreenrecording.net/">
+<meta property="og:title" content="FreeScreenRecording — Free Screen Recorder, Right In Your Browser">
+<meta property="og:description" content="Record your screen, tab, camera, or audio for free — no install, no account required.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://freescreenrecording.net/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0B10;
+    --ink-2:#14171D;
+    --paper:#F1EEE7;
+    --paper-dim:#9B9890;
+    --accent:#2EAA8C;
+    --accent-2:#D4A857;
+    --line:rgba(241,238,231,0.12);
+    --line-strong:rgba(241,238,231,0.22);
+    --radius:14px;
+    --max:1180px;
+    --shadow-soft:0 20px 50px rgba(0,0,0,0.28);
+    --shadow-lift:0 24px 60px rgba(0,0,0,0.38);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  ::selection{ background:var(--accent); color:var(--ink); }
+
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Manrope',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* subtle film-grain texture for a less "flat AI dark-mode" feel */
+  body::before{
+    content:"";
+    position:fixed; inset:0; z-index:9999; pointer-events:none;
+    opacity:0.035; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+  }
+
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%; display:block;}
+
+  .wrap{
+    max-width:var(--max);
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:9px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 3px rgba(46,170,140,0.18);
+  }
+
+  h1,h2,h3{
+    font-family:'Instrument Serif',serif;
+    font-weight:500;
+    letter-spacing:-0.015em;
+  }
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(11,14,20,0.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    transition:box-shadow .3s ease, border-color .3s ease;
+  }
+  header.nav.scrolled{
+    box-shadow:0 12px 32px rgba(0,0,0,0.3);
+    border-bottom-color:var(--line-strong);
+  }
+  .nav-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 32px;
+    max-width:var(--max); margin:0 auto;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Instrument Serif',serif; font-weight:600; font-size:18px;
+    letter-spacing:-0.01em; white-space:nowrap;
+  }
+  .logo .dot-anim{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--accent);
+    animation:pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(46,170,140,0.45);}
+    50%{box-shadow:0 0 0 6px rgba(46,170,140,0);}
+  }
+  .nav-links{
+    display:flex; gap:36px; align-items:center;
+    font-size:14.5px; color:var(--paper-dim);
+  }
+  .nav-links a{transition:color .2s;}
+  .nav-links a:hover, .nav-links a:focus-visible{color:var(--paper);}
+  .btn{
+    font-family:'Manrope',sans-serif;
+    font-weight:600; font-size:14.5px;
+    padding:11px 22px;
+    border-radius:999px;
+    border:1px solid transparent;
+    cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+    background:transparent;
+    appearance:none;
+    -webkit-appearance:none;
+    font-family:inherit;
+  }
+  .btn:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+  .btn-primary{
+    background:linear-gradient(180deg, #45bfa0, var(--accent)); color:var(--ink);
+    box-shadow:0 1px 0 rgba(255,255,255,0.25) inset, 0 6px 18px rgba(46,170,140,0.18);
+  }
+  .btn-primary:hover{transform:translateY(-1px); background:linear-gradient(180deg, #52cbad, #35b896); box-shadow:0 1px 0 rgba(255,255,255,0.3) inset, 0 10px 28px rgba(46,170,140,0.3);}
+  .btn-ghost{
+    border-color:var(--line-strong); color:var(--paper); background:transparent;
+  }
+  .btn-ghost:hover{border-color:var(--paper); transform:translateY(-1px);}
+  .btn-ghost:disabled{background:transparent;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:180px 0 120px;
+    position:relative;
+    background-image:
+      linear-gradient(180deg, rgba(10,11,16,0.55) 0%, rgba(10,11,16,0.75) 55%, var(--ink) 100%),
+      url('https://images.unsplash.com/photo-1758873271949-742d6648b6b0?fm=jpg&q=80&w=2400&auto=format&fit=crop');
+    background-size:cover;
+    background-position:center 30%;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-inner{
+    display:grid; gap:28px; max-width:760px;
+  }
+  .hero h1{
+    font-size:clamp(42px, 6.2vw, 76px);
+    line-height:1.04;
+    color:var(--paper);
+    text-shadow:0 4px 30px rgba(0,0,0,0.4);
+  }
+  .hero h1 em{
+    font-style:italic; color:var(--accent);
+  }
+  .hero p.sub{
+    font-size:18.5px; color:var(--paper);
+    max-width:520px; line-height:1.65;
+    text-shadow:0 2px 16px rgba(0,0,0,0.5);
+  }
+  .hero-ctas{
+    display:flex; gap:14px; align-items:center; margin-top:8px; flex-wrap:wrap;
+  }
+  .hero-note{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--paper);
+    opacity:0.85; text-shadow:0 2px 10px rgba(0,0,0,0.5);
+  }
+
+  /* ---------- SCRUBBER (signature element) ---------- */
+  .scrubber{
+    margin-top:64px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--ink-2);
+    padding:28px 28px 22px;
+    box-shadow:var(--shadow-soft);
+  }
+  .scrubber-top{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:20px;
+  }
+  .scrubber-title{
+    font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--paper-dim);
+    display:flex; align-items:center; gap:10px;
+  }
+  .rec-badge{
+    display:flex; align-items:center; gap:6px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:#F0928A;
+  }
+  .rec-badge .rdot{
+    width:7px;height:7px;border-radius:50%; background:#F0928A;
+    animation:pulse2 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse2{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+  .wave{
+    display:flex; align-items:flex-end; gap:3px;
+    height:64px;
+    padding:4px 0;
+    position:relative;
+  }
+  .wave span{
+    flex:1;
+    background:linear-gradient(180deg, var(--accent-2), rgba(212,168,87,0.25));
+    border-radius:2px;
+    min-width:2px;
+  }
+  .wave span.active{background:linear-gradient(180deg, var(--accent), rgba(46,170,140,0.3));}
+
+  .playhead{
+    position:absolute; top:0; bottom:0; width:2px; background:var(--accent);
+    box-shadow:0 0 8px rgba(46,170,140,0.6);
+    left:38%;
+  }
+  .playhead::after{
+    content:""; position:absolute; top:-4px; left:-4px;
+    width:10px;height:10px;border-radius:50%; background:var(--accent);
+  }
+
+  .scrubber-marks{
+    display:flex; justify-content:space-between;
+    margin-top:16px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--paper-dim);
+    border-top:1px solid var(--line);
+    padding-top:14px;
+  }
+  .scrubber-marks span b{color:var(--paper); font-weight:500;}
+
+  /* ---------- LOGO STRIP ---------- */
+  .logos{
+    padding:44px 0;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  .logos p{
+    text-align:center; font-family:'JetBrains Mono',monospace;
+    font-size:12px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--paper-dim); margin-bottom:26px;
+  }
+  .logo-row{
+    display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:28px;
+    opacity:0.55;
+    font-family:'Instrument Serif',serif; font-size:20px; font-weight:500;
+  }
+
+  /* ---------- PHOTO PANEL (Tonal-style full-bleed section) ---------- */
+  .photo-panel{
+    position:relative;
+    min-height:460px;
+    display:flex; align-items:center;
+    background-image:
+      linear-gradient(100deg, rgba(10,11,16,0.92) 0%, rgba(10,11,16,0.55) 45%, rgba(10,11,16,0.25) 100%),
+      url('https://images.unsplash.com/photo-1758873268745-dd2cf0d677b5?fm=jpg&q=80&w=2400&auto=format&fit=crop');
+    background-size:cover;
+    background-position:center;
+    border-bottom:1px solid var(--line);
+  }
+  .photo-panel-inner{
+    max-width:var(--max); margin:0 auto; padding:0 32px; width:100%;
+  }
+  .photo-panel-text{ max-width:480px; }
+  .photo-panel-text h2{
+    font-size:clamp(28px,4vw,42px); color:var(--paper); margin:16px 0 16px;
+    text-shadow:0 4px 24px rgba(0,0,0,0.5);
+  }
+  .photo-panel-text p{
+    font-size:16.5px; color:var(--paper); opacity:0.92; line-height:1.65; margin-bottom:28px;
+    text-shadow:0 2px 14px rgba(0,0,0,0.5);
+  }
+  @media (max-width:760px){
+    .photo-panel{ min-height:380px; }
+    .photo-panel-text{ max-width:100%; }
+  }
+
+  /* ---------- SECTION HEADERS ---------- */
+  .section{padding:120px 0;}
+  .section-head{
+    max-width:600px; margin-bottom:64px;
+  }
+  .section-head h2{
+    font-size:clamp(30px,4vw,42px);
+    margin-top:16px; color:var(--paper); line-height:1.15;
+  }
+  .section-head p{
+    color:var(--paper-dim); font-size:16.5px; margin-top:16px; line-height:1.65;
+  }
+
+  /* ---------- FEATURES ---------- */
+  .feature-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .feature-card{
+    background:var(--ink);
+    padding:34px 30px;
+    transition:background .25s ease;
+  }
+  .feature-card:hover{background:var(--ink-2);}
+  .feature-mark{
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent);
+    margin-bottom:18px; display:block;
+  }
+  .feature-card h3{
+    font-size:19px; color:var(--paper); margin-bottom:10px; font-weight:500;
+  }
+  .feature-card p{
+    color:var(--paper-dim); font-size:14.5px; line-height:1.6;
+  }
+
+  /* ---------- HOW IT WORKS (timeline) ---------- */
+  .timeline{
+    display:grid; gap:0;
+  }
+  .tl-row{
+    display:grid;
+    grid-template-columns:140px 1fr;
+    gap:32px;
+    padding:34px 0;
+    border-top:1px solid var(--line);
+    align-items:start;
+  }
+  .tl-row:last-child{border-bottom:1px solid var(--line);}
+  .tl-time{
+    font-family:'JetBrains Mono',monospace; color:var(--accent-2); font-size:15px; padding-top:4px;
+  }
+  .tl-body h3{font-size:22px; color:var(--paper); margin-bottom:8px; font-weight:500;}
+  .tl-body p{color:var(--paper-dim); font-size:15.5px; max-width:560px;}
+
+  /* ---------- COMPARISON TABLE ---------- */
+  .table-wrap{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  table{
+    width:100%; border-collapse:collapse;
+  }
+  thead th{
+    text-align:left;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px; text-transform:uppercase; letter-spacing:0.06em;
+    color:var(--paper-dim);
+    background:var(--ink-2);
+    padding:16px 24px;
+    border-bottom:1px solid var(--line);
+  }
+  tbody td{
+    padding:20px 24px;
+    border-bottom:1px solid var(--line);
+    font-size:15px; color:var(--paper);
+    vertical-align:top;
+  }
+  tbody td:first-child{color:var(--accent); font-weight:500; white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(255,255,255,0.02);}
+
+  /* ---------- TRUST / GUEST ---------- */
+  .trust{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:64px;
+    align-items:center;
+  }
+  .trust-badges{
+    display:flex; flex-direction:column; gap:18px;
+  }
+  .trust-badge{
+    display:flex; gap:16px; align-items:flex-start;
+    padding:20px;
+    border:1px solid var(--line);
+    border-radius:12px;
+  }
+  .trust-badge .ico{
+    font-family:'JetBrains Mono',monospace; color:var(--accent-2); font-size:13px;
+    border:1px solid var(--line-strong); border-radius:8px;
+    width:36px; height:36px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .trust-badge h4{font-size:15.5px; font-weight:600; margin-bottom:4px;}
+  .trust-badge p{font-size:14px; color:var(--paper-dim);}
+
+  /* ---------- TESTIMONIALS ---------- */
+  .testi-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:24px;
+  }
+  .testi-card{
+    border:1px solid var(--line); border-radius:var(--radius);
+    padding:30px 28px 28px; background:var(--ink-2); position:relative;
+  }
+  .testi-card::before{
+    content:"\201C";
+    font-family:'Instrument Serif',serif; font-size:56px; color:var(--accent);
+    opacity:0.35; line-height:1; display:block; margin-bottom:4px;
+  }
+  .testi-card p.quote{
+    font-family:'Instrument Serif',serif; font-style:italic; font-size:18px;
+    color:var(--paper); line-height:1.55; margin-bottom:22px;
+  }
+  .testi-who{display:flex; align-items:center; gap:12px;}
+  .testi-avatar{
+    width:36px;height:36px;border-radius:50%;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    flex-shrink:0;
+  }
+  .testi-who div span{display:block;}
+  .testi-name{font-size:14px; font-weight:600;}
+  .testi-role{font-size:12.5px; color:var(--paper-dim);}
+
+  /* ---------- FAQ / LIMITATIONS ---------- */
+  .faq-list{border-top:1px solid var(--line);}
+  .faq-item{
+    border-bottom:1px solid var(--line);
+    padding:26px 0;
+    cursor:pointer;
+  }
+  .faq-q{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:17px; color:var(--paper); font-weight:500;
+    font-family:'Instrument Serif',serif;
+  }
+  .faq-q .plus{
+    font-family:'JetBrains Mono',monospace; color:var(--accent); font-size:20px;
+    transition:transform .25s ease; flex-shrink:0; margin-left:20px;
+  }
+  .faq-item.open .plus{transform:rotate(45deg);}
+  .faq-a{
+    max-height:0; overflow:hidden;
+    transition:max-height .3s ease;
+    color:var(--paper-dim); font-size:15px; line-height:1.6;
+  }
+  .faq-item.open .faq-a{max-height:200px; margin-top:14px;}
+
+  /* ---------- FINAL CTA ---------- */
+  .cta-band{
+    margin:0 32px 110px;
+    max-width:calc(var(--max) - 64px);
+    margin-left:auto; margin-right:auto;
+    background:linear-gradient(135deg, var(--ink-2), var(--ink));
+    border:1px solid var(--line-strong);
+    border-radius:20px;
+    padding:64px 56px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .cta-band::before{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 50% 0%, rgba(46,170,140,0.12), transparent 60%);
+    pointer-events:none;
+  }
+  .cta-band h2{font-size:clamp(28px,4vw,40px); color:var(--paper); margin-bottom:14px;}
+  .cta-band p{color:var(--paper-dim); font-size:16px; margin-bottom:30px;}
+  .cta-band .hero-ctas{justify-content:center;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--line);
+    padding:56px 0 40px;
+  }
+  .footer-grid{
+    display:grid;
+    grid-template-columns:1.6fr repeat(3, 1fr);
+    gap:40px;
+    margin-bottom:48px;
+  }
+  .footer-col h5{
+    font-family:'JetBrains Mono',monospace; font-size:12px; text-transform:uppercase;
+    letter-spacing:0.07em; color:var(--paper-dim); margin-bottom:16px;
+  }
+  .footer-col a{
+    display:block; font-size:14.5px; color:var(--paper); opacity:0.75;
+    margin-bottom:11px; transition:opacity .2s;
+  }
+  .footer-col a:hover{opacity:1;}
+  .footer-bottom{
+    display:flex; justify-content:space-between; align-items:center;
+    padding-top:28px; border-top:1px solid var(--line);
+    font-size:13px; color:var(--paper-dim); flex-wrap:wrap; gap:12px;
+  }
+
+  /* ---------- STUDIO (live demo) ---------- */
+  .studio-section{padding:100px 0; border-bottom:1px solid var(--line);}
+  .studio-shell{
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    background:var(--ink-2);
+    overflow:hidden;
+  }
+  .studio-head{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:24px;
+    padding:28px 30px; border-bottom:1px solid var(--line); flex-wrap:wrap;
+  }
+  .studio-head h3{font-size:20px; color:var(--paper); margin-bottom:6px;}
+  .studio-head p{color:var(--paper-dim); font-size:14.5px; max-width:480px;}
+  .studio-badge{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--accent-2);
+    border:1px solid var(--line-strong); border-radius:999px; padding:6px 12px;
+    display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+  }
+  .studio-badge .sdot{width:6px;height:6px;border-radius:50%;background:var(--accent-2);}
+
+  .studio-body{padding:30px; display:grid; gap:26px;}
+
+  .mode-row{display:flex; gap:10px; flex-wrap:wrap;}
+  .mode-btn{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px;
+    padding:10px 16px; border-radius:999px; border:1px solid var(--line-strong);
+    background:transparent; color:var(--paper-dim); cursor:pointer;
+    transition:all .2s ease;
+  }
+  .mode-btn:hover{color:var(--paper); border-color:var(--paper-dim);}
+  .mode-btn.active{background:var(--accent); color:var(--ink); border-color:var(--accent); font-weight:600;}
+
+  .studio-stage{
+    border:1px solid var(--line); border-radius:12px; background:var(--ink);
+    padding:22px; display:grid; gap:18px;
+  }
+  .stage-top{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;}
+  .stage-title{font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--paper-dim);}
+  .timer{font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--paper);}
+  .rec-badge.live .rdot{background:#F0928A;}
+  .rec-badge.idle{color:var(--paper-dim);}
+  .rec-badge.idle .rdot{background:var(--paper-dim); animation:none;}
+
+  #studioWave{width:100%; height:72px; display:block; border-radius:8px;}
+
+  .preview-wrap{display:none;}
+  .preview-wrap.show{display:block;}
+  .preview-wrap video, .preview-wrap audio{width:100%; border-radius:8px; background:#000;}
+
+  .studio-controls{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
+  .studio-controls .btn{font-size:13.5px; padding:10px 20px;}
+  .btn-danger{background:#F0928A; color:var(--ink);}
+  .btn-danger:hover{background:#f5a89f; transform:translateY(-1px);}
+  .btn:disabled{opacity:0.4; cursor:not-allowed; transform:none !important;}
+
+  .studio-status{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--paper-dim);
+    min-height:18px;
+  }
+  .studio-status.error{color:#F0928A;}
+  .studio-status.ok{color:var(--accent-2);}
+
+  .studio-grid2{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  .transcript-box{
+    border:1px solid var(--line); border-radius:12px; background:var(--ink);
+    padding:18px; height:220px; overflow-y:auto;
+    font-size:14px; color:var(--paper-dim); line-height:1.6;
+  }
+  .transcript-box .line{color:var(--paper); margin-bottom:6px;}
+  .transcript-box .placeholder{color:var(--paper-dim); font-style:italic;}
+  .panel-label{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--paper-dim); margin-bottom:10px; display:flex;
+    justify-content:space-between; align-items:center;
+  }
+  .summary-box{
+    border:1px solid var(--line); border-radius:12px; background:var(--ink);
+    padding:18px; height:220px; overflow-y:auto; font-size:14px; color:var(--paper-dim); line-height:1.65;
+  }
+  .summary-box.filled{color:var(--paper);}
+
+  .library{display:grid; gap:12px;}
+  .lib-controls{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    flex-wrap:wrap; margin-bottom:14px;
+  }
+  .lib-controls .lib-selects{display:flex; gap:8px;}
+  .lib-select{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; padding:7px 10px;
+    border-radius:8px; border:1px solid var(--line-strong); background:var(--ink);
+    color:var(--paper); cursor:pointer;
+  }
+  .lib-group-label{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em;
+    color:var(--paper-dim); text-transform:uppercase; margin:18px 0 8px; padding-left:2px;
+  }
+  .lib-group-label:first-child{margin-top:0;}
+  .rec-card{
+    display:flex; align-items:center; gap:16px; padding:14px 18px;
+    border:1px solid var(--line); border-radius:12px; background:var(--ink);
+    flex-wrap:wrap;
+  }
+  .rec-icon{
+    width:72px; height:48px; border-radius:8px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--ink-2); border:1px solid var(--line-strong); color:var(--accent);
+    font-family:'JetBrains Mono',monospace; font-size:14px; overflow:hidden;
+  }
+  .rec-icon img{width:100%; height:100%; object-fit:cover; display:block;}
+  .rec-ready{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent);
+    white-space:nowrap; display:flex; align-items:center; gap:6px;
+  }
+  .rec-ready::before{content:'●'; font-size:8px;}
+  .rec-meta{flex:1; min-width:160px;}
+  .rec-meta .name{font-size:14.5px; color:var(--paper); font-weight:500;}
+  .rec-meta .sub{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--paper-dim); margin-top:2px;}
+  .rec-actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .rec-actions button{
+    font-family:'JetBrains Mono',monospace; font-size:12px; padding:8px 14px;
+    border-radius:999px; border:1px solid var(--line-strong); background:transparent;
+    color:var(--paper); cursor:pointer; transition:all .2s;
+  }
+  .rec-actions button:hover{border-color:var(--paper);}
+  .rec-actions button.danger:hover{border-color:#F0928A; color:#F0928A;}
+  .library-empty{color:var(--paper-dim); font-size:14px; font-style:italic; padding:8px 2px;}
+
+  /* ---------- SCREENSHOT STUDIO (Snipping Tool-style) ---------- */
+  .snip-toolbar{
+    display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+    background:var(--ink-2); border:1px solid var(--line); border-radius:12px; padding:8px;
+  }
+  .snip-sep{width:1px; height:26px; background:var(--line-strong); margin:0 4px;}
+  .snip-btn{
+    display:inline-flex; align-items:center; gap:7px;
+    background:transparent; border:1px solid transparent; border-radius:9px;
+    color:var(--paper); font-family:'JetBrains Mono',monospace; font-size:12.5px;
+    padding:9px 12px; cursor:pointer; transition:all .15s;
+  }
+  .snip-btn:hover{background:rgba(241,238,231,0.07); border-color:var(--line-strong);}
+  .snip-caret{font-size:9px; opacity:.7; margin-left:2px;}
+  .snip-dropdown{position:relative;}
+  .snip-menu{
+    position:absolute; top:calc(100% + 8px); left:0; min-width:200px;
+    background:var(--ink-2); border:1px solid var(--line-strong); border-radius:12px;
+    padding:6px; box-shadow:0 16px 40px rgba(0,0,0,.45); z-index:50;
+    display:none; flex-direction:column; gap:2px;
+  }
+  .snip-menu.open{display:flex;}
+  .snip-menu button{
+    display:flex; align-items:center; gap:11px; width:100%; text-align:left;
+    background:none; border:none; color:var(--paper); border-radius:8px;
+    padding:10px 11px; font-family:'JetBrains Mono',monospace; font-size:13px; cursor:pointer;
+  }
+  .snip-menu button:hover{background:rgba(241,238,231,0.08);}
+  .snip-menu button.active{color:var(--accent);}
+  .snip-menu button .mi{width:18px; display:inline-block; text-align:center; opacity:.85;}
+  .snip-stage{
+    border:1.5px dashed var(--line-strong); border-radius:14px; min-height:240px;
+    display:flex; align-items:center; justify-content:center; position:relative;
+    overflow:hidden; background:var(--ink); padding:18px;
+  }
+  .snip-hint{color:var(--paper-dim); font-family:'JetBrains Mono',monospace; font-size:13px; text-align:center; line-height:1.7;}
+  .snip-hint b{color:var(--paper);}
+  .snip-countdown{
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:64px; color:var(--accent);
+  }
+  .snip-preview-wrap{width:100%; text-align:center;}
+  .snip-preview-wrap img{max-width:100%; max-height:420px; border-radius:8px; display:inline-block; user-select:none;}
+  .snip-crop-frame{position:relative; display:inline-block; line-height:0; touch-action:none;}
+  .snip-crop-frame img{max-width:100%; max-height:420px; border-radius:8px; display:block; user-select:none; pointer-events:none;}
+  .snip-crop-overlay{position:absolute; inset:0; cursor:crosshair;}
+  .snip-crop-box{position:absolute; border:2px solid var(--accent); background:rgba(46,170,140,0.16); pointer-events:none;}
+  .snip-actions-row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:16px;}
+  .snip-actions-row .btn{font-size:13px; padding:9px 18px;}
+  .ocr-box{
+    margin-top:14px; width:100%; text-align:left; background:var(--ink-2); border:1px solid var(--line);
+    border-radius:10px; padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:13px;
+    color:var(--paper); white-space:pre-wrap; max-height:180px; overflow:auto;
+  }
+  .shot-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:12px;}
+  .shot-card{border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--ink-2); display:flex; flex-direction:column;}
+  .shot-card .shot-thumb{width:100%; aspect-ratio:16/10; object-fit:cover; display:block; background:#000;}
+  .shot-meta{padding:9px 10px 2px;}
+  .shot-meta .name{font-size:13px; color:var(--paper); font-weight:500;}
+  .shot-meta .sub{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--paper-dim); margin-top:2px;}
+  .shot-actions{display:flex; gap:6px; padding:8px 10px 10px; flex-wrap:wrap;}
+  .shot-actions button{
+    font-family:'JetBrains Mono',monospace; font-size:11px; padding:6px 10px;
+    border-radius:999px; border:1px solid var(--line-strong); background:transparent;
+    color:var(--paper); cursor:pointer; transition:all .2s;
+  }
+  .shot-actions button:hover{border-color:var(--paper);}
+  .shot-actions button.danger:hover{border-color:#F0928A; color:#F0928A;}
+
+  /* ---------- HOW-TO MINI WALKTHROUGH ---------- */
+  .howto-card{
+    display:flex; gap:30px; align-items:center;
+    border:1px solid var(--line-strong); border-radius:16px;
+    padding:22px 26px; margin-bottom:28px;
+    background:linear-gradient(135deg, rgba(46,170,140,0.07), rgba(212,168,87,0.04));
+  }
+  .howto-visual{flex:0 0 220px;}
+  .howto-mock{
+    position:relative; width:220px; height:150px;
+    background:var(--ink); border:1px solid var(--line); border-radius:12px;
+    overflow:hidden; padding:16px;
+  }
+  .howto-pill{
+    display:inline-block; font-family:'JetBrains Mono',monospace; font-size:10.5px;
+    padding:5px 10px; border-radius:999px; background:var(--accent); color:var(--ink);
+    font-weight:600; border:1px solid var(--accent);
+  }
+  .howto-btn-wrap{position:relative; margin-top:16px; height:26px;}
+  .howto-btn{
+    position:absolute; left:0; top:0; margin:0;
+    font-family:'Manrope',sans-serif; font-weight:600; font-size:11px;
+    padding:7px 14px; border-radius:999px; border:none; white-space:nowrap;
+  }
+  .howto-btn-idle{background:linear-gradient(180deg,#45bfa0,var(--accent)); color:var(--ink);
+    animation:howtoIdleFade 6s ease infinite;
+  }
+  .howto-btn-rec{background:#3a1a1a; color:#F0928A; opacity:0;
+    animation:howtoRecFade 6s ease infinite;
+  }
+  .howto-btn-rec .howto-timer{font-family:'JetBrains Mono',monospace;}
+  @keyframes howtoIdleFade{ 0%,38%{opacity:1;} 46%,92%{opacity:0;} 100%{opacity:1;} }
+  @keyframes howtoRecFade{ 0%,38%{opacity:0;} 46%,92%{opacity:1;} 100%{opacity:0;} }
+  .howto-bars{display:flex; gap:3px; align-items:flex-end; height:18px; margin-top:16px; opacity:0; animation:howtoBarsShow 6s ease infinite;}
+  .howto-bars span{width:3px; background:var(--accent); border-radius:2px; animation:howtoBar 0.9s ease-in-out infinite;}
+  .howto-bars span:nth-child(1){animation-delay:0s;}
+  .howto-bars span:nth-child(2){animation-delay:.12s;}
+  .howto-bars span:nth-child(3){animation-delay:.24s;}
+  .howto-bars span:nth-child(4){animation-delay:.36s;}
+  .howto-bars span:nth-child(5){animation-delay:.48s;}
+  @keyframes howtoBar{0%,100%{height:4px;} 50%{height:18px;}}
+  @keyframes howtoBarsShow{0%,42%{opacity:0;} 48%,90%{opacity:1;} 100%{opacity:0;}}
+  .howto-cursor{
+    position:absolute; width:14px; height:14px; border-radius:50%;
+    background:var(--paper); box-shadow:0 2px 6px rgba(0,0,0,0.4);
+    top:8px; left:36px;
+    animation:howtoCursorMove 6s ease infinite;
+  }
+  .howto-cursor::after{
+    content:""; position:absolute; inset:-6px; border-radius:50%;
+    border:2px solid var(--accent); opacity:0;
+    animation:howtoCursorRing 6s ease infinite;
+  }
+  @keyframes howtoCursorMove{
+    0%,4%{transform:translate(0,0) scale(1);}
+    38%{transform:translate(26px,40px) scale(1);}
+    42%{transform:translate(26px,40px) scale(0.6);}
+    46%{transform:translate(26px,40px) scale(1);}
+    90%{transform:translate(26px,40px) scale(1);}
+    96%,100%{transform:translate(0,0) scale(1);}
+  }
+  @keyframes howtoCursorRing{
+    0%,40%{opacity:0; transform:scale(0.6);}
+    44%{opacity:1; transform:scale(1);}
+    58%{opacity:0; transform:scale(1.8);}
+    100%{opacity:0;}
+  }
+  .howto-copy{flex:1; min-width:0;}
+  .howto-steps{list-style:none; margin-top:10px; display:flex; flex-direction:column; gap:10px; counter-reset:step;}
+  .howto-steps li{position:relative; padding-left:28px; font-size:13.5px; color:var(--paper-dim); line-height:1.55; counter-increment:step;}
+  .howto-steps li b{color:var(--paper);}
+  .howto-steps li::before{
+    content:counter(step); position:absolute; left:0; top:0; width:18px; height:18px;
+    border-radius:50%; background:var(--line-strong); color:var(--paper);
+    font-family:'JetBrains Mono',monospace; font-size:10px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  @media (max-width:680px){
+    .howto-card{flex-direction:column; align-items:stretch;}
+    .howto-visual{flex:none; width:100%; display:flex; justify-content:center;}
+  }
+
+  /* ---------- REALITY-CHECK CARD (what's real vs illustrative) ---------- */
+  .reality-card{
+    position:relative; border-radius:16px; padding:24px 26px;
+    background:var(--ink-2); border:1px solid var(--line-strong); overflow:hidden;
+  }
+  .reality-card::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:conic-gradient(from 0deg, transparent 0%, rgba(46,170,140,0.55) 12%, transparent 26%);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    animation:realitySpin 7s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes realitySpin{ to{ transform:rotate(360deg); } }
+  .reality-head{display:flex; align-items:center; gap:10px; margin-bottom:18px;}
+  .reality-dot{width:8px; height:8px; border-radius:50%; background:var(--accent); animation:pulse2 2s ease-in-out infinite; flex-shrink:0;}
+  .reality-head h4{font-family:'Instrument Serif',serif; font-weight:600; font-size:19px; color:var(--paper); letter-spacing:-0.01em;}
+  .reality-grid{display:grid; grid-template-columns:1.35fr 1fr; gap:30px;}
+  .reality-label{display:block; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent); margin-bottom:12px;}
+  .reality-label-not{color:var(--paper-dim);}
+  .reality-col ul{list-style:none; display:flex; flex-direction:column; gap:10px;}
+  .reality-col li{position:relative; padding-left:20px; font-size:13px; color:var(--paper-dim); line-height:1.6;}
+  .reality-col li b{color:var(--paper); font-weight:600;}
+  .reality-col-real li::before{content:"✓"; position:absolute; left:0; top:0; color:var(--accent); font-size:11px; font-weight:700;}
+  .reality-col-not li::before{content:"–"; position:absolute; left:2px; top:0; color:var(--paper-dim);}
+  .reality-footnote{margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); font-size:12px; color:var(--paper-dim); font-style:italic; line-height:1.55;}
+  @media (max-width:760px){ .reality-grid{grid-template-columns:1fr;} }
+
+  /* ---------- DOWNLOAD CONFIRM MODAL ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(11,14,20,0.75);
+    display:none; align-items:center; justify-content:center; z-index:200;
+    padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--ink-2); border:1px solid var(--line-strong); border-radius:var(--radius);
+    padding:30px 32px; max-width:380px; width:100%; text-align:center;
+  }
+  .modal-box h3{font-size:20px; color:var(--paper); margin-bottom:10px;}
+  .modal-box p{font-size:14.5px; color:var(--paper-dim); line-height:1.55;}
+  .modal-actions{display:flex; gap:12px; margin-top:24px; justify-content:center;}
+  .modal-actions .btn{padding:10px 22px; font-size:13.5px;}
+
+  @media (max-width:760px){
+    .studio-grid2{grid-template-columns:1fr;}
+  }
+
+  /* ---------- SCROLL REVEAL & POLISH ---------- */
+  .reveal{
+    opacity:0; transform:translateY(28px);
+    transition:opacity .8s cubic-bezier(.16,.8,.3,1), transform .8s cubic-bezier(.16,.8,.3,1);
+    will-change:opacity, transform;
+  }
+  .reveal.in-view{opacity:1; transform:translateY(0);}
+  .feature-grid .reveal:nth-child(2){transition-delay:.06s;}
+  .feature-grid .reveal:nth-child(3){transition-delay:.12s;}
+  .testi-grid .reveal:nth-child(2){transition-delay:.08s;}
+  .testi-grid .reveal:nth-child(3){transition-delay:.16s;}
+
+  /* Features: pop up with a slight tilt, like a card being set down */
+  .feature-card.reveal{ transform:translateY(22px) scale(0.94) rotate(-1.2deg); }
+  .feature-card.reveal.in-view{ transform:translateY(0) scale(1) rotate(0deg); }
+
+  /* How it works: alternating slide from left/right, like steps unfolding */
+  .tl-row.reveal{ transform:translateX(-36px); transition-duration:.7s; }
+  .tl-row.reveal:nth-child(even){ transform:translateX(36px); }
+  .tl-row.reveal.in-view{ transform:translateX(0); }
+
+  /* Testimonials: gentle rotate-in, like a card being flipped face-up */
+  .testi-card.reveal{ transform:translateY(24px) rotate(-2deg); }
+  .testi-card.reveal.in-view{ transform:translateY(0) rotate(0deg); }
+
+  /* Trust badges: scale-pop */
+  .trust-badge.reveal{ transform:scale(0.82); transition-duration:.6s; }
+  .trust-badge.reveal.in-view{ transform:scale(1); }
+
+  /* FAQ: slide in from the left, like a list being checked off */
+  .faq-item.reveal{ transform:translateX(-24px); }
+  .faq-item.reveal.in-view{ transform:translateX(0); }
+
+  /* Comparison table: simple rise, keeps dense data calm */
+  .table-wrap.reveal{ transform:translateY(18px); }
+
+  .feature-card{transition:background .25s ease, transform .3s ease, box-shadow .3s ease;}
+  .feature-card:hover{transform:translateY(-4px); box-shadow:var(--shadow-lift); position:relative; z-index:1;}
+  .testi-card{transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease;}
+  .testi-card:hover{transform:translateY(-4px); box-shadow:var(--shadow-soft); border-color:var(--line-strong);}
+  .trust-badge{transition:transform .3s ease, border-color .3s ease, box-shadow .3s ease;}
+  .trust-badge:hover{transform:translateY(-3px); border-color:var(--paper-dim); box-shadow:var(--shadow-soft);}
+  tbody tr{transition:background .2s ease;}
+
+  /* nav link animated underline */
+  .nav-links a{position:relative; padding-bottom:2px;}
+  .nav-links a::after{
+    content:""; position:absolute; left:0; bottom:-2px; width:0; height:1.5px;
+    background:var(--accent); transition:width .25s ease;
+  }
+  .nav-links a:hover::after, .nav-links a:focus-visible::after{width:100%;}
+
+  /* hero entrance */
+  .hero-inner .eyebrow, .hero-inner p.sub, .hero-inner .hero-ctas, .hero-inner .hero-note{
+    opacity:0; transform:translateY(18px);
+    animation:heroIn .8s cubic-bezier(.16,.8,.3,1) forwards;
+  }
+  .hero-inner .eyebrow{animation-delay:.05s;}
+  .hero-inner h1{animation-delay:.15s;}
+  .hero-inner p.sub{animation-delay:.28s;}
+  .hero-inner .hero-ctas{animation-delay:.4s;}
+  .hero-inner .hero-note{animation-delay:.5s;}
+  .scrubber{
+    opacity:0; transform:translateY(24px) scale(0.98);
+    animation:heroIn .9s cubic-bezier(.16,.8,.3,1) forwards;
+    animation-delay:.3s;
+  }
+  @keyframes heroIn{ to{ opacity:1; transform:translateY(0) scale(1); } }
+
+  /* headline word-by-word reveal */
+  .word-mask{display:inline-block; overflow:hidden; vertical-align:top; padding-bottom:0.08em; margin-bottom:-0.08em;}
+  .word-inner{
+    display:inline-block;
+    transform:translateY(112%);
+    opacity:0;
+    animation:wordUp .85s cubic-bezier(.16,.8,.3,1) forwards;
+  }
+  @keyframes wordUp{ to{ transform:translateY(0); opacity:1; } }
+
+  .logo .dot-anim, .rec-badge.live .rdot{ animation:pulse 2.2s ease-in-out infinite; }
+  .btn-primary:active{transform:translateY(0) scale(0.97);}
+  .btn-ghost:active{transform:scale(0.97);}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:860px){
+    .nav-links{display:none;}
+    .feature-grid{grid-template-columns:1fr;}
+    .trust{grid-template-columns:1fr; gap:36px;}
+    .testi-grid{grid-template-columns:1fr;}
+    .footer-grid{grid-template-columns:1fr 1fr; row-gap:32px;}
+    .tl-row{grid-template-columns:1fr; gap:10px;}
+    .section{padding:72px 0;}
+    .hero{padding:56px 0 40px;}
+    .cta-band{padding:44px 26px; margin:0 18px 72px;}
+    .studio-body{padding:22px;}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 20px;}
+    .footer-grid{grid-template-columns:1fr;}
+    table{font-size:13px;}
+    thead th, tbody td{padding:14px;}
+  }
+
+/* ---------- PRODUCT TOUR TABS ---------- */
+.tour-shell{
+  border:1px solid var(--line); border-radius:var(--radius);
+  background:var(--ink-2); overflow:hidden; box-shadow:var(--shadow-soft);
+}
+.tour-tabs{
+  display:flex; overflow-x:auto; border-bottom:1px solid var(--line);
+}
+.tour-tab{
+  flex:1; min-width:140px; padding:18px 20px; text-align:left;
+  background:transparent; border:none; cursor:pointer;
+  font-family:'Manrope',sans-serif; font-weight:700; font-size:14px; color:var(--paper-dim);
+  border-bottom:2px solid transparent; transition:color .2s ease, border-color .2s ease, background .2s ease;
+  display:flex; align-items:center; gap:8px;
+}
+.tour-tab .tnum{ font-family:'JetBrains Mono',monospace; font-weight:500; font-size:11px; color:var(--paper-dim); opacity:.7; }
+.tour-tab:hover{ color:var(--paper); background:rgba(255,255,255,0.02); }
+.tour-tab.active{ color:var(--accent); border-bottom-color:var(--accent); background:rgba(46,170,140,0.06); }
+.tour-panels{ position:relative; min-height:280px; }
+.tour-panel{
+  display:none; grid-template-columns:1.1fr 1fr; gap:32px; padding:36px;
+  animation:tourIn .45s ease both;
+}
+.tour-panel.active{ display:grid; }
+@keyframes tourIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+.tour-copy h3{ font-size:26px; color:var(--paper); margin-bottom:12px; }
+.tour-copy p{ color:var(--paper-dim); font-size:15px; line-height:1.65; }
+.tour-visual{
+  border:1px solid var(--line); border-radius:10px; background:var(--ink);
+  padding:20px; display:flex; flex-direction:column; gap:10px; justify-content:center;
+  min-height:180px;
+}
+.tv-bar{ height:10px; border-radius:5px; background:var(--line-strong); overflow:hidden; position:relative; }
+.tv-bar span{ position:absolute; inset:0; background:var(--accent); border-radius:5px; transform-origin:left; }
+.tv-row{ display:flex; align-items:center; gap:10px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--paper-dim); }
+.tv-dot{ width:8px; height:8px; border-radius:50%; background:var(--accent); flex:none; }
+.tv-comment{ background:var(--ink-2); border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:12.5px; color:var(--paper-dim); }
+.tv-comment b{ color:var(--accent-2); font-family:'JetBrains Mono',monospace; font-size:11px; margin-right:6px; }
+@media (max-width:760px){ .tour-panel{ grid-template-columns:1fr; } .tour-tab{ min-width:110px; padding:14px 12px; font-size:12.5px; } }
+
+/* ---------- TIMESTAMPED COMMENTS ---------- */
+.comments-panel{
+  margin-top:16px; border:1px solid var(--line); border-radius:10px; background:var(--ink-2); padding:16px 18px;
+}
+.comment-add-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.comment-input-row{ display:none; gap:8px; margin-bottom:12px; }
+.comment-input-row.show{ display:flex; }
+.comment-input-row input{
+  flex:1; background:var(--ink); border:1px solid var(--line-strong); border-radius:8px; color:var(--paper);
+  padding:9px 12px; font-family:'Manrope',sans-serif; font-size:13.5px;
+}
+.comment-input-row input:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+.comment-list{ display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; }
+.comment-item{
+  display:flex; gap:10px; align-items:flex-start; padding:9px 10px; border-radius:8px; cursor:pointer;
+  transition:background .15s ease;
+}
+.comment-item:hover{ background:rgba(255,255,255,0.04); }
+.comment-time{
+  font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink); background:var(--accent);
+  padding:3px 8px; border-radius:999px; flex:none; font-weight:700;
+}
+.comment-text{ font-size:13.5px; color:var(--paper); line-height:1.5; }
+.comment-empty{ font-size:13px; color:var(--paper-dim); font-style:italic; }
+
+/* ---------- TIMER / DEADLINE ---------- */
+.timer-badge{
+  display:inline-flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:11px;
+  padding:3px 9px; border-radius:999px; border:1px solid var(--line-strong); color:var(--paper-dim);
+}
+.timer-badge.urgent{ color:#F0928A; border-color:rgba(240,146,138,0.4); background:rgba(240,146,138,0.08); }
+.timer-badge.expired{ color:var(--paper-dim); border-color:var(--line); text-decoration:line-through; opacity:.6; }
+.timer-select{
+  background:var(--ink); border:1px solid var(--line-strong); border-radius:8px; color:var(--paper);
+  padding:7px 10px; font-family:'Manrope',sans-serif; font-size:12.5px;
+}
+</style>
+</head>
+<body id="top">
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="logo"><span class="dot-anim" aria-hidden="true"></span>FreeScreenRecording</a>
+    <nav class="nav-links">
+      <a href="#top">Home</a>
+      <a href="#studio">Live demo</a>
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#compare">Compare</a>
+      <a href="#trust">Security</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a href="#studio" class="btn btn-primary">Start free</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-inner">
+      <span class="eyebrow">Free browser-based screen recorder</span>
+      <h1>Record it once. <em>Share it</em> anywhere.</h1>
+      <p class="sub">Capture your screen, tab, or window in one click — with a live transcript running as you talk — then download it or drop timestamped comments for your team. No install, no account, nothing uploaded until you say so.</p>
+      <div class="hero-ctas">
+        <a href="#studio" class="btn btn-primary">Start recording free</a>
+        <a href="#how" class="btn btn-ghost">▸ See how it works</a>
+      </div>
+      <span class="hero-note">No install. No account. No credit card.</span>
+    </div>
+
+    <div class="scrubber" role="img" aria-label="Illustration of a meeting recording timeline with chapters for record, transcribe, and share">
+      <div class="scrubber-top">
+        <span class="scrubber-title">weekly-update-recording.webm</span>
+        <span class="rec-badge"><span class="rdot"></span>LIVE TRANSCRIPT</span>
+      </div>
+      <div class="wave" id="wave"></div>
+      <div class="scrubber-marks">
+        <span><b>00:00</b> Record</span>
+        <span><b>00:42</b> Transcribe</span>
+        <span><b>01:15</b> Summarize</span>
+        <span><b>01:40</b> Share</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="tour" style="padding-top:36px;">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Take the tour</span>
+      <h2>One recording, four things it becomes.</h2>
+      <p>Click through — this is the exact path every recording takes.</p>
+    </div>
+    <div class="tour-shell reveal">
+      <div class="tour-tabs" role="tablist" id="tourTabs">
+        <button class="tour-tab active" data-tab="record"><span class="tnum">01</span> Record</button>
+        <button class="tour-tab" data-tab="transcribe"><span class="tnum">02</span> Transcribe</button>
+        <button class="tour-tab" data-tab="comment"><span class="tnum">03</span> Comment</button>
+        <button class="tour-tab" data-tab="share"><span class="tnum">04</span> Share</button>
+      </div>
+      <div class="tour-panels" id="tourPanels">
+        <div class="tour-panel active" data-panel="record">
+          <div class="tour-copy">
+            <h3>Capture your screen in one click</h3>
+            <p>Screen, camera, or audio — pick a source and go. No install, no extension required, runs right in this tab.</p>
+          </div>
+          <div class="tour-visual">
+            <div class="tv-row"><span class="tv-dot"></span>weekly-sync-recording · 00:42</div>
+            <div class="tv-bar"><span style="width:64%;"></span></div>
+            <div class="tv-bar"><span style="width:38%;"></span></div>
+            <div class="tv-bar"><span style="width:81%;"></span></div>
+          </div>
+        </div>
+        <div class="tour-panel" data-panel="transcribe">
+          <div class="tour-copy">
+            <h3>A transcript, written as you talk</h3>
+            <p>Live speech-to-text runs while you record (in supported browsers), so there's already a transcript the moment you stop.</p>
+          </div>
+          <div class="tour-visual">
+            <div class="tv-row"><span class="tv-dot"></span>Live transcript</div>
+            <div class="tv-comment">"...let's push the deploy to Thursday instead of..."</div>
+            <div class="tv-comment">"...I'll own the migration script, should be done by..."</div>
+          </div>
+        </div>
+        <div class="tour-panel" data-panel="comment">
+          <div class="tour-copy">
+            <h3>Feedback pinned to the moment</h3>
+            <p>Drop a comment at an exact timestamp instead of a vague "around the middle somewhere" — click a comment to jump straight there.</p>
+          </div>
+          <div class="tour-visual">
+            <div class="tv-comment"><b>00:12</b>Can we slow down here? Missed the last point.</div>
+            <div class="tv-comment"><b>00:47</b>Good catch — updating the doc now.</div>
+            <div class="tv-comment"><b>01:20</b>👍 Approved, ship it.</div>
+          </div>
+        </div>
+        <div class="tour-panel" data-panel="share">
+          <div class="tour-copy">
+            <h3>Share a link, not an invite</h3>
+            <p>Send a recording with an optional response deadline — a light nudge that keeps async from turning into "I'll get to it eventually."</p>
+          </div>
+          <div class="tour-visual">
+            <div class="tv-row"><span class="tv-dot"></span>Shared with 3 teammates</div>
+            <span class="timer-badge urgent">⏱ Response needed in 4h</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="studio-section" id="studio">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Live demo — this actually works</span>
+      <h2>Record something right now.</h2>
+      <p>This runs for real in your browser: screen, camera, and mic capture, a live waveform, and (in supported browsers) a live transcript. Nothing uploads anywhere until you choose to download it.</p>
+    </div>
+
+    <div class="howto-card reveal">
+      <div class="howto-visual" aria-hidden="true">
+        <div class="howto-mock">
+          <span class="howto-pill">Screen</span>
+          <div class="howto-btn-wrap">
+            <button class="howto-btn howto-btn-idle" tabindex="-1">● Start recording</button>
+            <button class="howto-btn howto-btn-rec" tabindex="-1">● Recording <span class="howto-timer">00:03</span></button>
+          </div>
+          <div class="howto-bars"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="howto-cursor"></div>
+        </div>
+      </div>
+      <div class="howto-copy">
+        <div class="panel-label" style="margin-bottom:2px;"><span>How to start recording</span></div>
+        <ol class="howto-steps">
+          <li><b>Pick a source</b> above — Screen, Screen + Camera, Camera, or Audio only.</li>
+          <li><b>Click "Start recording."</b> Your browser will prompt for permission — once for screen/camera, once more for the mic if it's on.</li>
+          <li><b>You're recording.</b> The waveform and timer start right away; click Stop whenever you're done.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="studio-shell reveal" id="shotStudio" style="margin-bottom:26px;">
+      <div class="studio-head">
+        <div>
+          <h3>Screenshot studio</h3>
+          <p>Rectangle, window, full screen, or freeform — capture a screenshot right from your browser, with the same options as Windows Snipping Tool.</p>
+        </div>
+        <span class="studio-badge"><span class="sdot"></span>Runs locally in this tab</span>
+      </div>
+
+      <div class="studio-body">
+        <div class="snip-toolbar" id="snipToolbar">
+          <button class="btn btn-primary" id="btnSnipNew" style="font-size:13px; padding:9px 16px;">+ New</button>
+
+          <div class="snip-dropdown" id="shapeDropdown">
+            <button class="snip-btn" id="btnShapeMenu" type="button" aria-haspopup="true" title="Choose a capture shape">
+              <span class="mi" id="shapeIcon">▭</span><span id="shapeLabel">Rectangle</span><span class="snip-caret">▾</span>
+            </button>
+            <div class="snip-menu" id="shapeMenu" role="menu">
+              <button type="button" data-shape="rectangle" class="active"><span class="mi">▭</span>Rectangle</button>
+              <button type="button" data-shape="window"><span class="mi">▢</span>Window</button>
+              <button type="button" data-shape="fullscreen"><span class="mi">⬜</span>Full screen</button>
+              <button type="button" data-shape="freeform"><span class="mi">✎</span>Freeform</button>
+            </div>
+          </div>
+
+          <button class="snip-btn" id="btnGoVideo" type="button" title="Switch to video recording"><span class="mi">🎥</span>Record video instead</button>
+
+          <span class="snip-sep"></span>
+
+          <div class="snip-dropdown" id="delayDropdown">
+            <button class="snip-btn" id="btnDelayMenu" type="button" aria-haspopup="true" title="Set a delay before capture">
+              <span class="mi" id="delayIcon">⏱</span><span id="delayLabel">No delay</span><span class="snip-caret">▾</span>
+            </button>
+            <div class="snip-menu" id="delayMenu" role="menu">
+              <button type="button" data-delay="0" class="active"><span class="mi">⏱</span>No delay</button>
+              <button type="button" data-delay="3"><span class="mi">⏱</span>3-second delay</button>
+              <button type="button" data-delay="5"><span class="mi">⏱</span>5-second delay</button>
+              <button type="button" data-delay="10"><span class="mi">⏱</span>10-second delay</button>
+            </div>
+          </div>
+
+          <button class="snip-btn" id="btnTextExtract" type="button" title="Text extractor — capture and pull the text out of it"><span class="mi">▤</span>Text extractor</button>
+
+          <span class="snip-sep" id="liveSep" style="display:none;"></span>
+          <span class="snip-btn" id="liveBadge" style="display:none; color:var(--accent); cursor:default;"><span class="mi">●</span><span id="liveBadgeLabel">Sharing active</span></span>
+          <button class="snip-btn" id="btnStopSharing" type="button" style="display:none; color:#F0928A;" title="Stop sharing your screen with this site">Stop sharing</button>
+        </div>
+
+        <div class="snip-stage" id="snipStage">
+          <div class="snip-hint" id="snipHint">
+            Click <b>+ New</b> above to start a snip<br>
+            <span style="opacity:.75;">Your browser will ask what to share the first time — after that, snip as many times as you like without being asked again.</span><br>
+            <span style="opacity:.75;">Shape: <b id="snipHintShape">Rectangle</b> · Delay: <b id="snipHintDelay">No delay</b></span>
+          </div>
+        </div>
+
+        <div class="studio-status" id="snipStatus"></div>
+
+        <div>
+          <div class="panel-label"><span>Your screenshots</span><span id="shotCount">0 in this session</span></div>
+          <div class="shot-grid" id="shotLibrary">
+            <div class="library-empty">Nothing captured yet — your first screenshot will show up here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="studio-shell reveal" id="videoStudio">
+      <div class="studio-head">
+        <div>
+          <h3>Recording studio</h3>
+          <p>Pick a source, choose whether your mic is included, hit record — and it lands in your library below.</p>
+        </div>
+        <span class="studio-badge"><span class="sdot"></span>Runs locally in this tab</span>
+      </div>
+
+      <div class="studio-body">
+        <div class="mode-row" id="modeRow">
+          <button class="mode-btn active" data-mode="screen">Screen</button>
+          <button class="mode-btn" data-mode="screen-cam">Screen + Camera</button>
+          <button class="mode-btn" data-mode="cam">Camera</button>
+          <button class="mode-btn" data-mode="audio">Audio only</button>
+        </div>
+
+        <div class="mode-row" id="micRow" style="align-items:center;">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--paper-dim); padding:10px 0;">Mic:</span>
+          <button class="mode-btn active" data-mic="on" id="micOnBtn">🎤 Mic on</button>
+          <button class="mode-btn" data-mic="off" id="micOffBtn">🔇 Mic muted (system audio only)</button>
+        </div>
+
+        <div class="studio-stage">
+          <div class="stage-top">
+            <span class="stage-title" id="stageTitle">weekly-update-recording.webm</span>
+            <div style="display:flex; align-items:center; gap:16px;">
+              <span class="timer" id="studioTimer">00:00</span>
+              <span class="rec-badge idle" id="studioBadge"><span class="rdot"></span>READY</span>
+            </div>
+          </div>
+
+          <canvas id="studioWave" width="1000" height="72"></canvas>
+
+          <div class="preview-wrap" id="previewWrap">
+            <video id="previewVideo" controls playsinline></video>
+            <audio id="previewAudio" controls style="display:none;"></audio>
+            <div style="display:flex; align-items:center; gap:14px; margin-top:14px; flex-wrap:wrap;">
+              <button class="btn btn-primary" id="btnDownloadOriginal" style="font-size:13.5px; padding:10px 20px;">⬇ Download (full HD .webm)</button>
+              <button class="btn btn-ghost" id="btnDownload" style="font-size:12.5px; padding:8px 16px;">Try MP4 conversion (experimental, best under ~1 min)</button>
+            </div>
+            <div style="margin-top:8px;">
+              <span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--paper-dim);" id="downloadHint">The .webm keeps your full recorded resolution, downloads instantly, and always works — recommended. MP4 conversion runs a real encoder in your browser, which has a hard memory ceiling; it works fine on short clips but can fail on longer recordings like this one.</span>
+            </div>
+            <div class="studio-status" id="convertStatus" style="margin-top:4px;"></div>
+
+            <div class="comments-panel" id="commentsPanel">
+              <div class="panel-label" style="margin-bottom:10px;">
+                <span>Comments</span>
+                <span style="display:flex; align-items:center; gap:10px;">
+                  <select class="timer-select" id="timerSelect" title="Add a response deadline for this recording">
+                    <option value="">No deadline</option>
+                    <option value="3600000">Respond in 1h</option>
+                    <option value="14400000">Respond in 4h</option>
+                    <option value="86400000">Respond in 24h</option>
+                    <option value="259200000">Respond in 3 days</option>
+                  </select>
+                  <span class="timer-badge" id="timerBadge" style="display:none;"></span>
+                </span>
+              </div>
+              <div class="comment-add-row">
+                <button class="btn btn-ghost" id="btnAddComment" style="font-size:12px; padding:7px 14px;">+ Comment at <span id="commentTimeLabel">00:00</span></button>
+              </div>
+              <div class="comment-input-row" id="commentInputRow">
+                <input type="text" id="commentInput" placeholder="What's happening at this moment?" maxlength="240">
+                <button class="btn btn-primary" id="btnCommentSave" style="font-size:12px; padding:8px 16px;">Add</button>
+                <button class="btn btn-ghost" id="btnCommentCancel" style="font-size:12px; padding:8px 14px;">Cancel</button>
+              </div>
+              <div class="comment-list" id="commentList"><span class="comment-empty">No comments yet — play the recording and pin feedback to a moment.</span></div>
+            </div>
+          </div>
+
+          <div class="studio-controls">
+            <button class="btn btn-primary" id="btnStart">● Start recording</button>
+            <button class="btn btn-ghost" id="btnPause" disabled>Pause</button>
+            <button class="btn btn-danger" id="btnStop" disabled>Stop</button>
+          </div>
+
+          <div class="studio-status" id="studioStatus">Choose a source above, then click Start recording. If mic is on, your browser may ask for screen and microphone permission separately — watch for two prompts.</div>
+        </div>
+
+        <div class="studio-grid2">
+          <div>
+            <div class="panel-label"><span>Live transcript</span><span id="transcriptState">idle</span></div>
+            <div class="transcript-box" id="transcriptBox"><span class="placeholder">Transcript will appear here while recording, if your browser supports live speech recognition (Chrome/Edge on desktop).</span></div>
+          </div>
+          <div>
+            <div class="panel-label"><span>AI summary</span>
+              <button id="btnSummarize" class="mode-btn" style="padding:5px 12px; font-size:11px;" disabled>Generate</button>
+              <button id="btnUnlock" class="mode-btn" style="padding:5px 12px; font-size:11px; display:none;">Unlock AI Summaries — $5</button>
+            </div>
+            <div class="summary-box" id="summaryBox"><span class="placeholder">Record something with a transcript, then generate a short AI summary and action items.</span></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel-label"><span>Your recordings</span><span id="libCount">0 in this session</span></div>
+          <div class="lib-controls" style="justify-content:flex-end;">
+            <div class="lib-selects">
+              <select class="lib-select" id="libFilter">
+                <option value="anytime">Anytime</option>
+                <option value="today">Today</option>
+                <option value="week">This week</option>
+              </select>
+              <select class="lib-select" id="libSort">
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+              </select>
+            </div>
+          </div>
+          <div class="library" id="library">
+            <div class="library-empty">Nothing recorded yet — your first recording will show up here.</div>
+          </div>
+        </div>
+
+        <div class="reality-card reveal">
+          <div class="reality-head">
+            <span class="reality-dot"></span>
+            <h4>What's real vs. what's illustrative</h4>
+          </div>
+          <div class="reality-grid">
+            <div class="reality-col reality-col-real">
+              <span class="reality-label">Actually runs in this tab</span>
+              <ul>
+                <li>Screen / camera / audio recording, download, live waveform, and (where supported) live transcript</li>
+                <li>Video thumbnails and the sort/filter on your library</li>
+                <li>AI summary — calls Claude directly</li>
+                <li>Recording requests full HD and tells Chrome to prioritize sharpness over motion smoothness; the app reports your actual captured resolution afterward so you can verify it</li>
+                <li><b>"Download HD (MP4/MP3)"</b> loads a real conversion engine (ffmpeg.wasm, ~25 MB, one-time) and re-encodes fully in your browser — nothing is uploaded. It's capped at 1280px wide to keep browser memory in check, and can still fail on longer recordings</li>
+                <li><b>"Original .webm"</b> keeps your full recorded resolution (e.g. 1080p), downloads instantly, and has no memory limit — the more reliable choice for full quality</li>
+              </ul>
+            </div>
+            <div class="reality-col reality-col-not">
+              <span class="reality-label reality-label-not">Not wired up here</span>
+              <ul>
+                <li>User accounts and cross-device syncing</li>
+                <li>Team / channel workspaces</li>
+                <li>Auto-joining Zoom / Teams / Meet calls</li>
+                <li>Calendar sync</li>
+              </ul>
+              <p class="reality-footnote">These need real accounts, a database, and OAuth — which this static page doesn't have. Recordings also live only in this browser tab and are lost on refresh.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal-overlay" id="downloadModal">
+  <div class="modal-box">
+    <h3>Recording saved</h3>
+    <p id="modalMsg">Do you want to download your recording now?</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="modalYes">Download</button>
+      <button class="btn btn-ghost" id="modalNo">Not now</button>
+    </div>
+    <div style="margin-top:14px;">
+      <button id="modalOriginal" style="background:none; border:none; color:var(--paper-dim); font-family:'JetBrains Mono',monospace; font-size:12px; text-decoration:underline; cursor:pointer; padding:4px;">or download the original .webm instantly (no conversion)</button>
+    </div>
+  </div>
+</div>
+
+<section class="logos">
+  <div class="wrap">
+    <p>Trusted by teams who'd rather not meet about it</p>
+    <div class="logo-row">
+      <span>Northwind</span>
+      <span>Fieldstone</span>
+      <span>Arclight Labs</span>
+      <span>Perch &amp; Co.</span>
+      <span>Hollow Peak</span>
+    </div>
+  </div>
+</section>
+
+<section class="photo-panel">
+  <div class="photo-panel-inner">
+    <div class="photo-panel-text">
+      <span class="eyebrow">Built for how teams actually work</span>
+      <h2>Fewer calls. More context.</h2>
+      <p>A two-minute recording says more than a status meeting ever could — and everyone can watch it whenever their day actually allows.</p>
+      <a href="#studio" class="btn btn-primary">Try it free</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="features">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">What's inside</span>
+      <h2>Everything you need, minus the install.</h2>
+      <p>Six tools that replace screen-recording software nobody wants to download.</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card reveal">
+        <span class="feature-mark">01 — Recorder</span>
+        <h3>Capture your screen in one click</h3>
+        <p>Record your screen, a single tab or window, your camera, or audio only — right in the browser. No install, no extension.</p>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-mark">02 — Transcript</span>
+        <h3>A transcript, written as you talk</h3>
+        <p>Live speech-to-text runs while you record in supported browsers, so there's already a transcript the moment you stop.</p>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-mark">03 — AI Summary</span>
+        <h3>Catch up in ninety seconds</h3>
+        <p>Turn a long transcript into a short summary with the key points pulled out, so no one has to rewatch the whole thing.</p>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-mark">04 — Library</span>
+        <h3>Download it, keep it</h3>
+        <p>Every recording lands in your library, ready to download as a video file — no account, no upload required.</p>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-mark">05 — Timers</span>
+        <h3>A soft deadline, if you want one</h3>
+        <p>Set a response window on a recording and a live countdown badge keeps things moving without a scheduled meeting.</p>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-mark">06 — Feedback</span>
+        <h3>Feedback with a timestamp attached</h3>
+        <p>Drop comments directly on a moment in a recording, so nothing gets lost in translation. Click a comment to jump right there.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how" style="padding-top:0;">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">How it works</span>
+      <h2>One recording, four things it becomes.</h2>
+      <p>The same timeline every recording runs through — record, transcribe, comment, share.</p>
+    </div>
+    <div class="timeline">
+      <div class="tl-row reveal">
+        <span class="tl-time">00:00</span>
+        <div class="tl-body">
+          <h3>Record</h3>
+          <p>Pick screen, tab, window, camera, or audio and hit record — directly in the browser, nothing to install.</p>
+        </div>
+      </div>
+      <div class="tl-row reveal">
+        <span class="tl-time">00:42</span>
+        <div class="tl-body">
+          <h3>Transcribe &amp; summarize</h3>
+          <p>Live speech-to-text writes a transcript as you go; an optional AI summary distills it into the key points afterward.</p>
+        </div>
+      </div>
+      <div class="tl-row reveal">
+        <span class="tl-time">01:15</span>
+        <div class="tl-body">
+          <h3>Download or drop a comment</h3>
+          <p>Save it straight to your device, or pin timestamped feedback to the exact moment it applies to.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="compare">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">At a glance</span>
+      <h2>What each feature actually saves you.</h2>
+    </div>
+    <div class="table-wrap reveal">
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>Benefit</th><th>Best for</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Screen / Tab / Window Recording</td><td>No install, works in one click</td><td>Tutorials, bug reports, walkthroughs</td></tr>
+          <tr><td>Live Transcript</td><td>A transcript the moment you stop</td><td>Meeting recaps, accessibility</td></tr>
+          <tr><td>Timestamped Comments</td><td>Feedback pinned to the exact second</td><td>Design reviews, async QA</td></tr>
+          <tr><td>Response Timers</td><td>A soft deadline without a meeting</td><td>Async status updates</td></tr>
+          <tr><td>AI Summary</td><td>Key points in under a minute</td><td>Catching up fast</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="trust">
+  <div class="wrap trust">
+    <div>
+      <span class="eyebrow">Built to stay out of your way</span>
+      <h2 style="margin-top:14px; font-size:clamp(28px,4vw,38px);">Nothing leaves your browser unless you choose to send it.</h2>
+      <p style="color:var(--paper-dim); margin-top:16px; font-size:15.5px;">Recordings are made and stored locally in your tab. Share by downloading and sending the file yourself — no account required on either end.</p>
+    </div>
+    <div class="trust-badges">
+      <div class="trust-badge reveal">
+        <div class="ico">✓</div>
+        <div><h4>Runs locally</h4><p>Capture and playback happen in your browser — nothing uploads until you download it.</p></div>
+      </div>
+      <div class="trust-badge reveal">
+        <div class="ico">◐</div>
+        <div><h4>No account needed</h4><p>Start recording immediately. Nothing to sign up for, nothing to install.</p></div>
+      </div>
+      <div class="trust-badge reveal">
+        <div class="ico">⇄</div>
+        <div><h4>Your file, your call</h4><p>Download the original .webm anytime — full control over where it goes from there.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Why people reach for it</span>
+      <h2>No install, no upload, no waiting.</h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <p class="quote">Skip the daily status call — record a two-minute update instead, and people actually watch it.</p>
+      </div>
+      <div class="testi-card reveal">
+        <p class="quote">Clients don't need an account to watch a recap. Send the link, they open it, done.</p>
+      </div>
+      <div class="testi-card reveal">
+        <p class="quote">The AI summary is fast enough that you can skip taking notes and just watch it back later.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Worth knowing</span>
+      <h2>The honest version.</h2>
+      <p>A few things to weigh before you switch your team over.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <div class="faq-q"><span>Do I need an account or any extension installed?</span><span class="plus">+</span></div>
+        <div class="faq-a"><p>No. Everything runs in this browser tab using your browser's built-in screen-capture API. Nothing to sign up for, download, or install.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-q"><span>Is it safe to record sensitive meetings?</span><span class="plus">+</span></div>
+        <div class="faq-a"><p>Recording and playback happen locally in your browser, and nothing uploads unless you choose to use the paid AI summary. Still, check your own company's policy before recording anything confidential.</p></div>
+      </div>
+      <div class="faq-item reveal">
+        <div class="faq-q"><span>Will my team actually switch to async?</span><span class="plus">+</span></div>
+        <div class="faq-a"><p>Teams used to live meetings need a few weeks to build the habit. Start with one recurring meeting and expand once it sticks.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band reveal" id="start">
+  <div class="wrap" style="padding:0;">
+    <h2>Your next meeting could be a recording.</h2>
+    <p>Set it up in under five minutes. Cancel anytime.</p>
+    <div class="hero-ctas">
+      <a href="#studio" class="btn btn-primary">Start recording free</a>
+      <a href="#" class="btn btn-ghost">Talk to sales</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="logo"><span class="dot-anim" aria-hidden="true"></span>FreeScreenRecording</div>
+        <p style="color:var(--paper-dim); font-size:14px; margin-top:14px; max-width:260px;">Free screen recording, right in your browser.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="#studio">Live demo</a>
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#compare">Compare</a>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <a href="#">About</a>
+        <a href="#">Careers</a>
+        <a href="#">Blog</a>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <a href="#trust">Security</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 FreeScreenRecording. All rights reserved.</span>
+      <span>freescreenrecording.net</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Generate waveform bars
+  (function(){
+    const wave = document.getElementById('wave');
+    const bars = 64;
+    for(let i=0;i<bars;i++){
+      const bar = document.createElement('span');
+      const h = 14 + Math.abs(Math.sin(i*0.35)) * 42 + Math.random()*10;
+      bar.style.height = h + 'px';
+      if(i/bars < 0.38) bar.classList.add('active');
+      wave.appendChild(bar);
+    }
+  })();
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+      if(!isOpen) item.classList.add('open');
+    });
+  });
+
+  // Split the hero headline into words that reveal one-by-one, staggered
+  (function(){
+    const h1 = document.querySelector('.hero-inner h1');
+    if(!h1) return;
+    let index = 0;
+    const BASE_DELAY = 0.4; // let the rest of the hero start settling first
+    const STEP = 0.09;
+
+    function wrapWords(node){
+      if(node.nodeType === Node.TEXT_NODE){
+        const parts = node.textContent.split(/(\s+)/); // keep whitespace tokens
+        const frag = document.createDocumentFragment();
+        parts.forEach(part=>{
+          if(part.trim() === ''){
+            frag.appendChild(document.createTextNode(part));
+            return;
+          }
+          const mask = document.createElement('span');
+          mask.className = 'word-mask';
+          const inner = document.createElement('span');
+          inner.className = 'word-inner';
+          inner.textContent = part;
+          inner.style.animationDelay = (BASE_DELAY + index * STEP) + 's';
+          index++;
+          mask.appendChild(inner);
+          frag.appendChild(mask);
+        });
+        node.replaceWith(frag);
+      } else if(node.nodeType === Node.ELEMENT_NODE){
+        Array.from(node.childNodes).forEach(wrapWords);
+      }
+    }
+    Array.from(h1.childNodes).forEach(wrapWords);
+  })();
+
+  // Nav gains a subtle shadow once the page has scrolled
+  (function(){
+    const nav = document.querySelector('header.nav');
+    if(!nav) return;
+    const onScroll = ()=> nav.classList.toggle('scrolled', window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive:true });
+  })();
+
+  // Scroll-reveal: fade/slide elements in as they enter the viewport
+  (function(){
+    const revealEls = document.querySelectorAll('.reveal');
+    if(!('IntersectionObserver' in window) || revealEls.length === 0){
+      revealEls.forEach(el=>el.classList.add('in-view'));
+      return;
+    }
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el=> io.observe(el));
+  })();
+</script>
+
+<script>
+(function(){
+  'use strict';
+
+  // ---------- element refs ----------
+  const modeRow      = document.getElementById('modeRow');
+  const micOnBtn = document.getElementById('micOnBtn');
+  const micOffBtn = document.getElementById('micOffBtn');
+  const btnStart      = document.getElementById('btnStart');
+  const btnPause       = document.getElementById('btnPause');
+  const btnStop         = document.getElementById('btnStop');
+  const studioTimer      = document.getElementById('studioTimer');
+  const studioBadge        = document.getElementById('studioBadge');
+  const studioWaveCanvas     = document.getElementById('studioWave');
+  const previewWrap            = document.getElementById('previewWrap');
+  const previewVideo             = document.getElementById('previewVideo');
+  const previewAudio                = document.getElementById('previewAudio');
+  const btnDownload = document.getElementById('btnDownload');
+  const btnDownloadOriginal = document.getElementById('btnDownloadOriginal');
+  const downloadModal = document.getElementById('downloadModal');
+  const convertStatus = document.getElementById('convertStatus');
+  const modalMsg = document.getElementById('modalMsg');
+  const modalYes = document.getElementById('modalYes');
+  const modalNo = document.getElementById('modalNo');
+  const modalOriginal = document.getElementById('modalOriginal');
+  const studioStatus                  = document.getElementById('studioStatus');
+  const stageTitle                       = document.getElementById('stageTitle');
+  const transcriptBox                       = document.getElementById('transcriptBox');
+  const transcriptState                        = document.getElementById('transcriptState');
+  const summaryBox                                = document.getElementById('summaryBox');
+  const btnSummarize                                 = document.getElementById('btnSummarize');
+  const btnUnlock                                    = document.getElementById('btnUnlock');
+  const library                                        = document.getElementById('library');
+  const libFilter                                       = document.getElementById('libFilter');
+  const libSort                                         = document.getElementById('libSort');
+  const libCount                                          = document.getElementById('libCount');
+  const waveCtx = studioWaveCanvas.getContext('2d');
+  const btnAddComment    = document.getElementById('btnAddComment');
+  const commentInputRow  = document.getElementById('commentInputRow');
+  const commentInput     = document.getElementById('commentInput');
+  const btnCommentSave   = document.getElementById('btnCommentSave');
+  const btnCommentCancel = document.getElementById('btnCommentCancel');
+  const commentList      = document.getElementById('commentList');
+  const commentTimeLabel = document.getElementById('commentTimeLabel');
+  const timerSelect      = document.getElementById('timerSelect');
+  const timerBadge       = document.getElementById('timerBadge');
+
+  let mode = 'screen';
+  let micWanted = true;
+  let micTrackRef = null;
+  let recordings = [];
+  let recIdCounter = 1;
+
+  // live session state (reset each recording)
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let allTracksToStop = [];
+  let audioCtxForMix = null;
+  let compositeRAF = null;
+  let waveRAF = null;
+  let analyser = null;
+  let analyserSource = null;
+  let recognition = null;
+  let recognitionActive = false;
+  let liveTranscriptFinal = '';
+  let liveTranscriptInterim = '';
+  let timerInterval = null;
+  let recordStartTs = 0;
+  let lastDurationMs = 0;
+  let lastCaptureRes = null; // { width, height } actually negotiated, for diagnostics
+  let pausedAccumMs = 0;
+  let pauseStartTs = 0;
+  let isPaused = false;
+  let currentBlob = null;
+  let activeRec = null;
+  let currentMime = 'video/webm';
+  let deadlineInterval = null;
+
+  // ---------- screenshot studio ----------
+  const btnSnipNew      = document.getElementById('btnSnipNew');
+  const btnShapeMenu    = document.getElementById('btnShapeMenu');
+  const shapeMenu       = document.getElementById('shapeMenu');
+  const shapeLabel      = document.getElementById('shapeLabel');
+  const shapeIcon       = document.getElementById('shapeIcon');
+  const btnDelayMenu    = document.getElementById('btnDelayMenu');
+  const delayMenu       = document.getElementById('delayMenu');
+  const delayLabel      = document.getElementById('delayLabel');
+  const btnGoVideo      = document.getElementById('btnGoVideo');
+  const btnTextExtract  = document.getElementById('btnTextExtract');
+  const liveSep         = document.getElementById('liveSep');
+  const liveBadge       = document.getElementById('liveBadge');
+  const liveBadgeLabel  = document.getElementById('liveBadgeLabel');
+  const btnStopSharing  = document.getElementById('btnStopSharing');
+  const snipStage       = document.getElementById('snipStage');
+  const snipStatus      = document.getElementById('snipStatus');
+  const snipHintShape   = document.getElementById('snipHintShape');
+  const snipHintDelay   = document.getElementById('snipHintDelay');
+  const shotLibrary     = document.getElementById('shotLibrary');
+  const shotCount       = document.getElementById('shotCount');
+
+  const SHAPE_ICONS = { rectangle:'▭', window:'▢', fullscreen:'⬜', freeform:'✎' };
+  const SHAPE_LABELS = { rectangle:'Rectangle', window:'Window', fullscreen:'Full screen', freeform:'Freeform' };
+  let shapeMode = 'rectangle';
+  let delaySeconds = 0;
+  let shots = [];
+  let shotIdCounter = 1;
+  let ocrEngineLoading = null;
+  let liveCaptureStream = null;
+  let liveCaptureTrack = null;
+  let liveCaptureVideo = null;
+  let liveCaptureLabel = '';
+
+  function closeSnipMenus(){
+    shapeMenu.classList.remove('open');
+    delayMenu.classList.remove('open');
+  }
+  document.addEventListener('click', (e)=>{
+    if(!e.target.closest('#shapeDropdown')) shapeMenu.classList.remove('open');
+    if(!e.target.closest('#delayDropdown')) delayMenu.classList.remove('open');
+  });
+  btnShapeMenu.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const willOpen = !shapeMenu.classList.contains('open');
+    closeSnipMenus();
+    if(willOpen) shapeMenu.classList.add('open');
+  });
+  btnDelayMenu.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const willOpen = !delayMenu.classList.contains('open');
+    closeSnipMenus();
+    if(willOpen) delayMenu.classList.add('open');
+  });
+  shapeMenu.querySelectorAll('button[data-shape]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      shapeMode = btn.dataset.shape;
+      shapeMenu.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b===btn));
+      shapeIcon.textContent = SHAPE_ICONS[shapeMode];
+      shapeLabel.textContent = SHAPE_LABELS[shapeMode];
+      snipHintShape.textContent = SHAPE_LABELS[shapeMode];
+      closeSnipMenus();
+    });
+  });
+  delayMenu.querySelectorAll('button[data-delay]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      delaySeconds = parseInt(btn.dataset.delay, 10) || 0;
+      delayMenu.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b===btn));
+      delayLabel.textContent = delaySeconds === 0 ? 'No delay' : delaySeconds + '-second delay';
+      snipHintDelay.textContent = delayLabel.textContent;
+      closeSnipMenus();
+    });
+  });
+  btnGoVideo.addEventListener('click', ()=>{
+    document.getElementById('videoStudio').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  function setSnipStatus(msg, kind){
+    snipStatus.textContent = msg || '';
+    snipStatus.className = 'studio-status' + (kind ? ' ' + kind : '');
+  }
+
+  function resetSnipStage(){
+    snipStage.innerHTML = '<div class="snip-hint" id="snipHint">Click <b>+ New</b> above to start a snip<br><span style="opacity:.75;">' + (liveCaptureStream ? 'Sharing is already on \u2014 this snip won\u2019t ask again.' : 'Your browser will ask what to share the first time \u2014 after that, snip as many times as you like without being asked again.') + '</span><br><span style="opacity:.75;">Shape: <b id="snipHintShape">' + SHAPE_LABELS[shapeMode] + '</b> \u00b7 Delay: <b id="snipHintDelay">' + (delaySeconds===0?'No delay':delaySeconds+'-second delay') + '</b></span></div>';
+  }
+
+  async function runCountdown(seconds){
+    for(let n = seconds; n > 0; n--){
+      snipStage.innerHTML = '<div class="snip-countdown">' + n + '</div>';
+      setSnipStatus('Get your screen ready \u2014 capturing in ' + n + '\u2026');
+      await new Promise(res=> setTimeout(res, 1000));
+    }
+  }
+
+  // Renders the captured canvas, letting the user drag a rectangle or draw a
+  // freeform lasso to crop. Resolves with a cropped canvas, or null if canceled.
+  function runCropUI(sourceCanvas, shape){
+    return new Promise((resolve)=>{
+      snipStage.innerHTML = '';
+      const frame = document.createElement('div');
+      frame.className = 'snip-crop-frame';
+      const img = document.createElement('img');
+      img.src = sourceCanvas.toDataURL('image/png');
+      frame.appendChild(img);
+      const overlay = document.createElement('div');
+      overlay.className = 'snip-crop-overlay';
+      frame.appendChild(overlay);
+      snipStage.appendChild(frame);
+
+      const rowWrap = document.createElement('div');
+      rowWrap.style.cssText = 'display:flex; flex-direction:column; align-items:center; width:100%;';
+      const hint = document.createElement('div');
+      hint.className = 'snip-hint';
+      hint.style.marginTop = '14px';
+      hint.innerHTML = shape === 'freeform'
+        ? 'Drag to draw around the area you want, then release.'
+        : 'Drag to select the area you want, then release.';
+      rowWrap.appendChild(hint);
+      const actions = document.createElement('div');
+      actions.className = 'snip-actions-row';
+      const useFullBtn = document.createElement('button');
+      useFullBtn.className = 'btn btn-ghost';
+      useFullBtn.textContent = 'Use full frame instead';
+      useFullBtn.onclick = ()=> resolve(sourceCanvas);
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-ghost';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.onclick = ()=> resolve(null);
+      actions.append(useFullBtn, cancelBtn);
+      rowWrap.appendChild(actions);
+      snipStage.appendChild(rowWrap);
+
+      function scaleFactors(){
+        const rect = img.getBoundingClientRect();
+        return {
+          sx: sourceCanvas.width / rect.width,
+          sy: sourceCanvas.height / rect.height,
+          left: rect.left,
+          top: rect.top
+        };
+      }
+
+      if(shape === 'rectangle'){
+        let startX=0, startY=0, box=null, dragging=false;
+        overlay.addEventListener('pointerdown', (e)=>{
+          dragging = true;
+          overlay.setPointerCapture(e.pointerId);
+          const r = overlay.getBoundingClientRect();
+          startX = e.clientX - r.left; startY = e.clientY - r.top;
+          box = document.createElement('div');
+          box.className = 'snip-crop-box';
+          overlay.appendChild(box);
+        });
+        overlay.addEventListener('pointermove', (e)=>{
+          if(!dragging || !box) return;
+          const r = overlay.getBoundingClientRect();
+          const curX = e.clientX - r.left, curY = e.clientY - r.top;
+          const left = Math.min(startX, curX), top = Math.min(startY, curY);
+          const w = Math.abs(curX - startX), h = Math.abs(curY - startY);
+          box.style.left = left+'px'; box.style.top = top+'px';
+          box.style.width = w+'px'; box.style.height = h+'px';
+        });
+        overlay.addEventListener('pointerup', ()=>{
+          dragging = false;
+          if(!box) return;
+          const bw = parseFloat(box.style.width)||0, bh = parseFloat(box.style.height)||0;
+          if(bw < 6 || bh < 6){ box.remove(); box = null; return; }
+          const f = scaleFactors();
+          const cx = parseFloat(box.style.left) * f.sx;
+          const cy = parseFloat(box.style.top) * f.sy;
+          const cw = bw * f.sx, ch = bh * f.sy;
+          const out = document.createElement('canvas');
+          out.width = Math.max(1, Math.round(cw)); out.height = Math.max(1, Math.round(ch));
+          out.getContext('2d').drawImage(sourceCanvas, cx, cy, cw, ch, 0, 0, out.width, out.height);
+          resolve(out);
+        });
+      } else {
+        // freeform lasso
+        let points = [];
+        let drawing = false;
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(svgNS, 'svg');
+        svg.style.cssText = 'position:absolute; inset:0; width:100%; height:100%; pointer-events:none;';
+        const path = document.createElementNS(svgNS, 'polyline');
+        path.setAttribute('fill', 'rgba(46,170,140,0.16)');
+        path.setAttribute('stroke', 'var(--accent)');
+        path.setAttribute('stroke-width', '2');
+        svg.appendChild(path);
+        overlay.appendChild(svg);
+
+        overlay.addEventListener('pointerdown', (e)=>{
+          drawing = true; points = [];
+          overlay.setPointerCapture(e.pointerId);
+          const r = overlay.getBoundingClientRect();
+          points.push([e.clientX - r.left, e.clientY - r.top]);
+        });
+        overlay.addEventListener('pointermove', (e)=>{
+          if(!drawing) return;
+          const r = overlay.getBoundingClientRect();
+          points.push([e.clientX - r.left, e.clientY - r.top]);
+          path.setAttribute('points', points.map(p=>p.join(',')).join(' '));
+        });
+        overlay.addEventListener('pointerup', ()=>{
+          drawing = false;
+          if(points.length < 3){ return; }
+          const f = scaleFactors();
+          const scaled = points.map(p=> [p[0]*f.sx, p[1]*f.sy]);
+          const xs = scaled.map(p=>p[0]), ys = scaled.map(p=>p[1]);
+          const minX = Math.min(...xs), maxX = Math.max(...xs);
+          const minY = Math.min(...ys), maxY = Math.max(...ys);
+          const w = Math.max(1, Math.round(maxX-minX)), h = Math.max(1, Math.round(maxY-minY));
+          const out = document.createElement('canvas');
+          out.width = w; out.height = h;
+          const octx = out.getContext('2d');
+          octx.save();
+          octx.beginPath();
+          scaled.forEach((p,i)=>{
+            const x = p[0]-minX, y = p[1]-minY;
+            if(i===0) octx.moveTo(x,y); else octx.lineTo(x,y);
+          });
+          octx.closePath();
+          octx.clip();
+          octx.drawImage(sourceCanvas, minX, minY, w, h, 0, 0, w, h);
+          octx.restore();
+          resolve(out);
+        });
+      }
+    });
+  }
+
+  function updateLiveBadge(){
+    const isLive = !!(liveCaptureStream && liveCaptureTrack && liveCaptureTrack.readyState === 'live');
+    liveSep.style.display = isLive ? '' : 'none';
+    liveBadge.style.display = isLive ? '' : 'none';
+    btnStopSharing.style.display = isLive ? '' : 'none';
+    liveBadgeLabel.textContent = isLive ? ('Sharing ' + liveCaptureLabel + ' — snip anytime') : '';
+  }
+
+  function stopLiveCapture(){
+    if(liveCaptureStream){
+      liveCaptureStream.getTracks().forEach(t=> t.stop());
+    }
+    liveCaptureStream = null;
+    liveCaptureTrack = null;
+    liveCaptureVideo = null;
+    liveCaptureLabel = '';
+    updateLiveBadge();
+  }
+  btnStopSharing.addEventListener('click', ()=>{
+    stopLiveCapture();
+    setSnipStatus('Stopped sharing. The next snip will ask you to choose a source again.');
+    resetSnipStage();
+  });
+
+  // Gets a live video element pointed at the user's screen, reusing an
+  // already-granted share so the browser's picker only appears once per
+  // session — click "Stop sharing" (or the browser's own bar) to end it.
+  async function getLiveCaptureVideo(shape){
+    const surfaceOk = !liveCaptureStream || (
+      // a fresh displaySurface preference only matters for the very first grant;
+      // once shared, any shape can snip from the same live source
+      true
+    );
+    if(liveCaptureStream && liveCaptureTrack && liveCaptureTrack.readyState === 'live' && surfaceOk){
+      return liveCaptureVideo;
+    }
+    setSnipStatus('Choose what to share \u2014 you\u2019ll only be asked once this session.');
+    const videoConstraints = { frameRate:{ ideal:15, max:20 } };
+    if(shape === 'fullscreen') videoConstraints.displaySurface = 'monitor';
+    if(shape === 'window') videoConstraints.displaySurface = 'window';
+    const stream = await navigator.mediaDevices.getDisplayMedia({ video: videoConstraints, audio:false });
+    const track = stream.getVideoTracks()[0];
+    const video = document.createElement('video');
+    video.muted = true; video.playsInline = true;
+    video.srcObject = stream;
+    await video.play().catch(()=>{});
+    await new Promise((res)=>{
+      if(video.readyState >= 2) return res();
+      video.onloadedmetadata = ()=> res();
+    });
+    track.onended = ()=>{
+      stopLiveCapture();
+      setSnipStatus('Sharing ended. The next snip will ask you to choose a source again.');
+    };
+    liveCaptureStream = stream;
+    liveCaptureTrack = track;
+    liveCaptureVideo = video;
+    liveCaptureLabel = track.getSettings && track.getSettings().displaySurface
+      ? track.getSettings().displaySurface
+      : 'your screen';
+    updateLiveBadge();
+    return video;
+  }
+
+  async function startCapture(shape, opts){
+    opts = opts || {};
+    try{
+      const video = await getLiveCaptureVideo(shape);
+
+      if(delaySeconds > 0) await runCountdown(delaySeconds);
+
+      const w = video.videoWidth || 1280, h = video.videoHeight || 720;
+      const full = document.createElement('canvas');
+      full.width = w; full.height = h;
+      full.getContext('2d').drawImage(video, 0, 0, w, h);
+
+      setSnipStatus('Captured. ' + (shape==='rectangle'||shape==='freeform' ? 'Select the area you want.' : ''));
+
+      let finalCanvas = full;
+      if(shape === 'rectangle' || shape === 'freeform'){
+        const cropped = await runCropUI(full, shape);
+        if(!cropped){ setSnipStatus('Capture canceled.'); resetSnipStage(); return; }
+        finalCanvas = cropped;
+      }
+
+      finishCapture(finalCanvas, shape, opts);
+    }catch(e){
+      setSnipStatus(e && e.message ? e.message : 'Screen capture was canceled or blocked by the browser.', 'error');
+    }
+  }
+
+  function finishCapture(canvas, shape, opts){
+    const dataUrl = canvas.toDataURL('image/png');
+    const shot = {
+      id: shotIdCounter++,
+      dataUrl,
+      w: canvas.width,
+      h: canvas.height,
+      mode: SHAPE_LABELS[shape] || shape,
+      createdAt: Date.now(),
+      ocrText: null
+    };
+    shots.unshift(shot);
+    renderShotLibrary();
+
+    snipStage.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'snip-preview-wrap';
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    wrap.appendChild(img);
+
+    const actions = document.createElement('div');
+    actions.className = 'snip-actions-row';
+
+    const dlBtn = document.createElement('button');
+    dlBtn.className = 'btn btn-primary';
+    dlBtn.textContent = '\u2b07 Download PNG';
+    dlBtn.onclick = ()=> downloadShot(shot);
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'btn btn-ghost';
+    copyBtn.textContent = 'Copy to clipboard';
+    copyBtn.onclick = ()=> copyShotToClipboard(shot, copyBtn);
+
+    const newBtn = document.createElement('button');
+    newBtn.className = 'btn btn-ghost';
+    newBtn.textContent = 'New snip';
+    newBtn.onclick = ()=> startCapture(shapeMode);
+
+    actions.append(dlBtn, copyBtn, newBtn);
+    wrap.appendChild(actions);
+
+    if(opts.ocr){
+      const ocrBox = document.createElement('div');
+      ocrBox.className = 'ocr-box';
+      ocrBox.textContent = 'Loading the text-extraction engine\u2026';
+      wrap.appendChild(ocrBox);
+      extractText(canvas).then(text=>{
+        shot.ocrText = text;
+        if(!text || !text.trim()){
+          ocrBox.textContent = 'No text was detected in this capture.';
+          return;
+        }
+        ocrBox.textContent = '';
+        const pre = document.createElement('div');
+        pre.textContent = text;
+        const copyTextBtn = document.createElement('button');
+        copyTextBtn.className = 'btn btn-ghost';
+        copyTextBtn.style.cssText = 'font-size:12px; padding:6px 12px; margin-top:10px;';
+        copyTextBtn.textContent = 'Copy extracted text';
+        copyTextBtn.onclick = ()=>{
+          navigator.clipboard.writeText(text).then(()=>{
+            copyTextBtn.textContent = 'Copied!';
+            setTimeout(()=> copyTextBtn.textContent = 'Copy extracted text', 1500);
+          }).catch(()=>{});
+        };
+        ocrBox.appendChild(pre);
+        ocrBox.appendChild(copyTextBtn);
+      }).catch(()=>{
+        ocrBox.textContent = 'Text extraction needs an internet connection to load the OCR engine, and didn\u2019t manage to load it this time.';
+      });
+    }
+
+    snipStage.appendChild(wrap);
+    setSnipStatus('Saved to your screenshots below.', 'ok');
+  }
+
+  function downloadShot(shot){
+    const a = document.createElement('a');
+    a.href = shot.dataUrl;
+    a.download = 'screenshot-' + shot.id + '.png';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  async function copyShotToClipboard(shot, btn){
+    try{
+      const res = await fetch(shot.dataUrl);
+      const blob = await res.blob();
+      await navigator.clipboard.write([ new ClipboardItem({ 'image/png': blob }) ]);
+      if(btn){ const prev = btn.textContent; btn.textContent = 'Copied!'; setTimeout(()=> btn.textContent = prev, 1500); }
+    }catch(e){
+      setSnipStatus('Couldn\u2019t copy to clipboard in this browser \u2014 use Download instead.', 'error');
+    }
+  }
+
+  function loadOcrEngine(){
+    if(window.Tesseract) return Promise.resolve();
+    if(ocrEngineLoading) return ocrEngineLoading;
+    ocrEngineLoading = new Promise((resolve, reject)=>{
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js';
+      s.onload = ()=> resolve();
+      s.onerror = ()=> reject(new Error('Could not load OCR engine.'));
+      document.head.appendChild(s);
+    });
+    return ocrEngineLoading;
+  }
+
+  async function extractText(canvas){
+    await loadOcrEngine();
+    const { data } = await window.Tesseract.recognize(canvas.toDataURL('image/png'), 'eng');
+    return data && data.text ? data.text.trim() : '';
+  }
+
+  btnSnipNew.addEventListener('click', ()=> startCapture(shapeMode));
+  btnTextExtract.addEventListener('click', ()=> startCapture(shapeMode, { ocr:true }));
+
+  function renderShotLibrary(){
+    shotCount.textContent = shots.length + ' in this session';
+    if(shots.length === 0){
+      shotLibrary.innerHTML = '<div class="library-empty">Nothing captured yet \u2014 your first screenshot will show up here.</div>';
+      return;
+    }
+    shotLibrary.innerHTML = '';
+    shots.forEach(shot=>{
+      const card = document.createElement('div');
+      card.className = 'shot-card';
+      const img = document.createElement('img');
+      img.className = 'shot-thumb';
+      img.src = shot.dataUrl;
+      img.alt = '';
+      const meta = document.createElement('div');
+      meta.className = 'shot-meta';
+      const timeLabel = new Date(shot.createdAt).toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' });
+      meta.innerHTML = '<div class="name">' + shot.mode + ' snip</div><div class="sub">' + timeLabel + ' \u00b7 ' + shot.w + '\u00d7' + shot.h + '</div>';
+      const actions = document.createElement('div');
+      actions.className = 'shot-actions';
+      const dlBtn = document.createElement('button');
+      dlBtn.textContent = 'Download';
+      dlBtn.onclick = ()=> downloadShot(shot);
+      const copyBtn = document.createElement('button');
+      copyBtn.textContent = 'Copy';
+      copyBtn.onclick = ()=> copyShotToClipboard(shot, copyBtn);
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Delete';
+      delBtn.className = 'danger';
+      delBtn.onclick = ()=>{
+        shots = shots.filter(s=> s.id !== shot.id);
+        renderShotLibrary();
+      };
+      actions.append(dlBtn, copyBtn, delBtn);
+      card.append(img, meta, actions);
+      shotLibrary.appendChild(card);
+    });
+  }
+
+  // ---------- mode selector ----------
+  modeRow.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.mode-btn');
+    if(!btn) return;
+    modeRow.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    setStatus(`Source: ${btn.textContent}. Click Start recording when ready.`);
+  });
+
+  function setMicWanted(wantOn){
+    micWanted = wantOn;
+    micOnBtn.classList.toggle('active', wantOn);
+    micOffBtn.classList.toggle('active', !wantOn);
+    if(micTrackRef) micTrackRef.enabled = wantOn; // live toggle while recording
+    setStatus(wantOn ? 'Mic is on.' : 'Mic muted — only system/tab audio (and camera audio, if any) will be recorded.');
+  }
+  micOnBtn.addEventListener('click', ()=> setMicWanted(true));
+  micOffBtn.addEventListener('click', ()=> setMicWanted(false));
+
+  function setStatus(msg, kind){
+    studioStatus.textContent = msg;
+    studioStatus.className = 'studio-status' + (kind ? ' ' + kind : '');
+  }
+
+  function pad(n){ return n.toString().padStart(2,'0'); }
+
+  function updateTimer(){
+    const elapsed = Date.now() - recordStartTs - pausedAccumMs;
+    const s = Math.max(0, Math.floor(elapsed/1000));
+    const mm = Math.floor(s/60), ss = s%60;
+    studioTimer.textContent = pad(mm) + ':' + pad(ss);
+  }
+
+  // ---------- waveform ----------
+  function drawIdleWave(){
+    const w = studioWaveCanvas.width, h = studioWaveCanvas.height;
+    waveCtx.clearRect(0,0,w,h);
+    waveCtx.strokeStyle = 'rgba(236,233,225,0.15)';
+    waveCtx.lineWidth = 2;
+    waveCtx.beginPath();
+    waveCtx.moveTo(0, h/2);
+    waveCtx.lineTo(w, h/2);
+    waveCtx.stroke();
+  }
+
+  function startWaveLoop(stream){
+    try{
+      const audioTracks = stream.getAudioTracks();
+      if(audioTracks.length === 0){ drawIdleWave(); return; }
+      audioCtxForMix = audioCtxForMix || new (window.AudioContext || window.webkitAudioContext)();
+      analyserSource = audioCtxForMix.createMediaStreamSource(new MediaStream([audioTracks[0]]));
+      analyser = audioCtxForMix.createAnalyser();
+      analyser.fftSize = 256;
+      analyserSource.connect(analyser);
+      const data = new Uint8Array(analyser.frequencyBinCount);
+      const w = studioWaveCanvas.width, h = studioWaveCanvas.height;
+
+      function draw(){
+        analyser.getByteFrequencyData(data);
+        waveCtx.clearRect(0,0,w,h);
+        const barCount = 64;
+        const step = Math.floor(data.length/barCount);
+        const barW = w/barCount;
+        for(let i=0;i<barCount;i++){
+          const v = data[i*step]/255;
+          const barH = Math.max(3, v*h);
+          const grad = waveCtx.createLinearGradient(0,h-barH,0,h);
+          grad.addColorStop(0, i/barCount < 0.4 ? '#2EAA8C' : '#D4A857');
+          grad.addColorStop(1, 'rgba(212,168,87,0.15)');
+          waveCtx.fillStyle = grad;
+          waveCtx.fillRect(i*barW+1, h-barH, barW-2, barH);
+        }
+        waveRAF = requestAnimationFrame(draw);
+      }
+      draw();
+    }catch(err){
+      drawIdleWave();
+    }
+  }
+
+  function stopWaveLoop(){
+    if(waveRAF) cancelAnimationFrame(waveRAF);
+    waveRAF = null;
+    if(analyserSource){ try{ analyserSource.disconnect(); }catch(e){} analyserSource = null; }
+    analyser = null;
+    drawIdleWave();
+  }
+
+  drawIdleWave();
+
+  // ---------- fix missing/placeholder duration in recorded WebM files ----------
+  // MediaRecorder writes WebM for streaming, so the file's header usually has no
+  // valid total duration at all (confirmed via ffprobe on real recordings: Chrome
+  // typically omits the Duration element from Segment > Info entirely, rather than
+  // leaving a placeholder). Many players then only show elapsed time with no total
+  // and a non-working seek bar. We insert a real Duration element after recording
+  // stops so the file reports a correct total duration everywhere.
+  function readEbmlVint(bytes, offset, keepMarkerBits){
+    const first = bytes[offset];
+    if(first === undefined || first === 0) return null;
+    let mask = 0x80, length = 1;
+    while(length <= 8 && !(first & mask)){ mask >>= 1; length++; }
+    if(length > 8 || offset + length > bytes.length) return null;
+    let value = keepMarkerBits ? first : (first & (mask - 1));
+    for(let i = 1; i < length; i++) value = value * 256 + bytes[offset + i];
+    return { length, value };
+  }
+
+  function encodeEbmlVintValue(value, length){
+    const bytes = new Uint8Array(length);
+    let v = value;
+    for(let i = length - 1; i >= 1; i--){ bytes[i] = v & 0xFF; v = Math.floor(v / 256); }
+    const markerBit = 0x80 >> (length - 1);
+    bytes[0] = markerBit | v;
+    return bytes;
+  }
+
+  function readEbmlElement(bytes, offset){
+    const idInfo = readEbmlVint(bytes, offset, true);
+    if(!idInfo) return null;
+    const sizeOffset = offset + idInfo.length;
+    const sizeInfo = readEbmlVint(bytes, sizeOffset, false);
+    if(!sizeInfo) return null;
+    const allOnes = Math.pow(2, 7 * sizeInfo.length) - 1;
+    const dataOffset = sizeOffset + sizeInfo.length;
+    return {
+      id: idInfo.value,
+      size: sizeInfo.value,
+      unknownSize: sizeInfo.value === allOnes,
+      dataOffset,
+      elOffset: offset,
+      idLen: idInfo.length,
+      sizeLen: sizeInfo.length
+    };
+  }
+
+  function concatByteArrays(arrays){
+    const total = arrays.reduce((s,a)=>s+a.length, 0);
+    const out = new Uint8Array(total);
+    let o = 0;
+    for(const a of arrays){ out.set(a, o); o += a.length; }
+    return out;
+  }
+
+  // Returns { ok:true, bytes:Uint8Array } on success, or { ok:false } if the file
+  // can't be safely patched (e.g. unrecognized structure) — caller should fall
+  // back to the original, untouched file in that case.
+  function patchWebmDuration(bytes, durationMs){
+    const SEGMENT = 0x18538067, INFO = 0x1549A966, CLUSTER = 0x1F43B675,
+          TIMECODE_SCALE = 0x2AD7B1, DURATION = 0x4489;
+
+    let off = 0;
+    let segment = null;
+    while(off < bytes.length){
+      const el = readEbmlElement(bytes, off);
+      if(!el) return { ok:false };
+      if(el.id === SEGMENT){ segment = el; break; }
+      if(el.unknownSize) return { ok:false };
+      off = el.dataOffset + el.size;
+    }
+    if(!segment) return { ok:false };
+
+    const segEnd = segment.unknownSize ? bytes.length : segment.dataOffset + segment.size;
+    let o = segment.dataOffset;
+    let info = null;
+    while(o < segEnd){
+      const el = readEbmlElement(bytes, o);
+      if(!el) break;
+      if(el.id === CLUSTER) break; // Info always comes before the first Cluster
+      if(el.id === INFO){ info = el; break; }
+      if(el.unknownSize) break;
+      o = el.dataOffset + el.size;
+    }
+    if(!info || info.unknownSize) return { ok:false };
+
+    let timecodeScale = 1000000; // ns, WebM default
+    let durationEl = null;
+    let io = info.dataOffset;
+    const infoEnd = info.dataOffset + info.size;
+    while(io < infoEnd){
+      const el = readEbmlElement(bytes, io);
+      if(!el) break;
+      if(el.id === TIMECODE_SCALE){
+        let v = 0;
+        for(let i = 0; i < el.size; i++) v = v * 256 + bytes[el.dataOffset + i];
+        timecodeScale = v || timecodeScale;
+      } else if(el.id === DURATION){
+        durationEl = el;
+      }
+      io = el.dataOffset + el.size;
+    }
+
+    const ticks = (durationMs * 1e6) / timecodeScale;
+
+    // Case 1: a Duration element already exists (placeholder) — patch its value in place.
+    if(durationEl){
+      const patched = new Uint8Array(bytes); // don't mutate caller's array
+      const dv = new DataView(patched.buffer, patched.byteOffset, patched.byteLength);
+      if(durationEl.size === 8){ dv.setFloat64(durationEl.dataOffset, ticks, false); return { ok:true, bytes:patched }; }
+      if(durationEl.size === 4){ dv.setFloat32(durationEl.dataOffset, ticks, false); return { ok:true, bytes:patched }; }
+      return { ok:false };
+    }
+
+    // Case 2: no Duration element at all (the common real-world case) — insert one
+    // as a new child of Info, growing Info's size field. Safe because these files
+    // have no SeekHead/Cues with absolute byte offsets that this would invalidate.
+    const durIdBytes = new Uint8Array([0x44, 0x89]);
+    const durValueBytes = new Uint8Array(8);
+    new DataView(durValueBytes.buffer).setFloat64(0, ticks, false);
+    const durSizeVint = encodeEbmlVintValue(8, 1);
+    const newDurationEl = concatByteArrays([durIdBytes, durSizeVint, durValueBytes]);
+
+    const newInfoSize = info.size + newDurationEl.length;
+    const maxRepresentable = Math.pow(2, 7 * info.sizeLen) - 2; // reserve all-1s for "unknown"
+    if(newInfoSize > maxRepresentable) return { ok:false }; // would need a longer size field — bail out cleanly
+
+    const sizeFieldOffset = info.elOffset + info.idLen;
+    const newSizeVint = encodeEbmlVintValue(newInfoSize, info.sizeLen);
+
+    const before = bytes.slice(0, sizeFieldOffset);
+    const infoBody = bytes.slice(info.dataOffset, info.dataOffset + info.size);
+    const after = bytes.slice(info.dataOffset + info.size);
+    const result = concatByteArrays([before, newSizeVint, infoBody, newDurationEl, after]);
+    return { ok:true, bytes: result };
+  }
+
+  async function fixWebmDuration(blob, durationMs){
+    try{
+      const buf = await blob.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      const result = patchWebmDuration(bytes, durationMs);
+      return result.ok ? new Blob([result.bytes], { type: blob.type || 'video/webm' }) : blob;
+    }catch(e){
+      return blob; // if anything goes wrong, fall back to the original file
+    }
+  }
+
+  // ---------- shared audio mixing ----------
+  // Combines audio tracks from multiple streams (e.g. system/tab audio + mic)
+  // into a single mixed audio track using the Web Audio API.
+  function mixAudioStreams(streamsWithAudio){
+    const usable = streamsWithAudio.filter(s => s && s.getAudioTracks().length > 0);
+    if(usable.length === 0) return [];
+    audioCtxForMix = audioCtxForMix || new (window.AudioContext || window.webkitAudioContext)();
+    const dest = audioCtxForMix.createMediaStreamDestination();
+    usable.forEach(s=>{
+      audioCtxForMix.createMediaStreamSource(new MediaStream([s.getAudioTracks()[0]])).connect(dest);
+    });
+    return dest.stream.getAudioTracks();
+  }
+
+  // ---------- screen + camera compositing ----------
+  async function compositeScreenCam(displayStream, camStream){
+    const dispVideo = document.createElement('video');
+    dispVideo.srcObject = displayStream; dispVideo.muted = true; dispVideo.playsInline = true;
+    await dispVideo.play();
+    const camVideo = document.createElement('video');
+    camVideo.srcObject = camStream; camVideo.muted = true; camVideo.playsInline = true;
+    await camVideo.play();
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 1920; canvas.height = 1080;
+    const ctx = canvas.getContext('2d', { alpha: false }); // no transparency needed — avoids VP9's much heavier alpha-channel encode path, which was forcing the browser to crush resolution to keep up in real time
+
+    function draw(){
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0,0,canvas.width, canvas.height);
+      if(dispVideo.videoWidth){
+        ctx.drawImage(dispVideo, 0, 0, canvas.width, canvas.height);
+      }
+      if(camVideo.videoWidth){
+        const r = 135, cx = canvas.width - r - 36, cy = canvas.height - r - 36;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.closePath();
+        ctx.clip();
+        const vw = camVideo.videoWidth, vh = camVideo.videoHeight;
+        const side = Math.min(vw, vh);
+        ctx.drawImage(camVideo, (vw-side)/2, (vh-side)/2, side, side, cx-r, cy-r, r*2, r*2);
+        ctx.restore();
+        ctx.strokeStyle = '#2EAA8C';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.stroke();
+      }
+      compositeRAF = requestAnimationFrame(draw);
+    }
+    draw();
+
+    const canvasStream = canvas.captureStream(15);
+    const canvasVideoTrack = canvasStream.getVideoTracks()[0];
+    if(canvasVideoTrack) canvasVideoTrack.contentHint = 'detail';
+    const audioTracks = mixAudioStreams([displayStream, camStream]);
+    return new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
+  }
+
+  // Chrome's screen-capture pipeline will silently downscale resolution to save
+  // CPU/bandwidth unless told otherwise. This nudges it back toward full quality.
+  async function sharpenDisplayTrack(track){
+    if(!track) return;
+    track.contentHint = 'detail'; // prioritize sharpness over motion smoothness
+    try{
+      await track.applyConstraints({
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        frameRate: { ideal: 30 },
+        resizeMode: 'none' // stop Chrome from auto-downscaling/cropping the captured track
+      });
+    }catch(e){ /* browser may not support resizeMode as a constraint — safe to ignore */ }
+  }
+
+  async function buildStream(selectedMode){
+    micTrackRef = null;
+    lastCaptureRes = null;
+
+    if(selectedMode === 'screen'){
+      setStatus('Requesting screen access — pick a tab, window, or screen in the browser dialog…');
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        video:{
+          frameRate:{ ideal:15, max:20 },
+          width:{ ideal:1920 },
+          height:{ ideal:1080 },
+          resizeMode:'none'
+        },
+        audio:true
+      });
+      allTracksToStop.push(...displayStream.getTracks());
+      watchForScreenShareEnd(displayStream);
+
+      const videoTrack = displayStream.getVideoTracks()[0];
+      if(!videoTrack){
+        throw new Error('No video track was captured. In the share dialog, choose "Entire Screen" or a browser tab (not just audio), then try again.');
+      }
+      await sharpenDisplayTrack(videoTrack);
+
+      let micStream = null;
+      if(micWanted){
+        setStatus('Screen shared. Now check for a microphone permission prompt from your browser…');
+        try{ micStream = await navigator.mediaDevices.getUserMedia({ audio:true }); }
+        catch(e){ /* mic denied/unavailable — still record with system/tab audio if any */ }
+      }
+      if(micStream){
+        allTracksToStop.push(...micStream.getTracks());
+        micTrackRef = micStream.getAudioTracks()[0] || null;
+        if(micTrackRef) micTrackRef.enabled = micWanted;
+      }
+
+      const vSettings = videoTrack.getSettings ? videoTrack.getSettings() : {};
+      lastCaptureRes = { width: vSettings.width || null, height: vSettings.height || null };
+
+      const mixedAudio = mixAudioStreams([displayStream, micStream]);
+      return new MediaStream([videoTrack, ...mixedAudio]);
+    }
+
+    if(selectedMode === 'cam'){
+      setStatus(micWanted ? 'Requesting camera and microphone access…' : 'Requesting camera access (mic is muted, so no mic prompt)…');
+      const camStream = await navigator.mediaDevices.getUserMedia({
+        video:{ width:{ ideal:1920 }, height:{ ideal:1080 } },
+        audio: micWanted
+      });
+      allTracksToStop.push(...camStream.getTracks());
+      if(camStream.getVideoTracks().length === 0){
+        throw new Error('No camera video track was captured. Check that a camera is connected and permitted.');
+      }
+      micTrackRef = camStream.getAudioTracks()[0] || null;
+      if(micTrackRef) micTrackRef.enabled = micWanted;
+      const camSettings = camStream.getVideoTracks()[0].getSettings ? camStream.getVideoTracks()[0].getSettings() : {};
+      lastCaptureRes = { width: camSettings.width || null, height: camSettings.height || null };
+      return camStream;
+    }
+
+    if(selectedMode === 'audio'){
+      if(!micWanted){
+        throw new Error('Mic is muted, but "Audio only" mode has no other audio source. Turn the mic back on, or switch to Screen mode to capture system audio without your mic.');
+      }
+      setStatus('Requesting microphone access…');
+      const micStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+      allTracksToStop.push(...micStream.getTracks());
+      micTrackRef = micStream.getAudioTracks()[0] || null;
+      if(micTrackRef) micTrackRef.enabled = micWanted;
+      return micStream;
+    }
+
+    if(selectedMode === 'screen-cam'){
+      setStatus('Requesting screen access — pick a tab, window, or screen in the browser dialog…');
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        video:{
+          frameRate:{ ideal:15, max:20 },
+          width:{ ideal:1920 },
+          height:{ ideal:1080 },
+          resizeMode:'none'
+        },
+        audio:true
+      });
+      watchForScreenShareEnd(displayStream);
+      if(displayStream.getVideoTracks().length === 0){
+        throw new Error('No screen video track was captured. In the share dialog, choose "Entire Screen" or a browser tab, then try again.');
+      }
+      await sharpenDisplayTrack(displayStream.getVideoTracks()[0]);
+      setStatus(micWanted ? 'Screen shared. Now requesting camera and microphone access…' : 'Screen shared. Now requesting camera access (mic is muted, so no mic prompt)…');
+      const camStream = await navigator.mediaDevices.getUserMedia({
+        video:{ width:{ ideal:1920 }, height:{ ideal:1080 } },
+        audio: micWanted
+      });
+      allTracksToStop.push(...displayStream.getTracks(), ...camStream.getTracks());
+      micTrackRef = camStream.getAudioTracks()[0] || null;
+      if(micTrackRef) micTrackRef.enabled = micWanted;
+      lastCaptureRes = { width: 1920, height: 1080 }; // fixed canvas compositing resolution
+      return await compositeScreenCam(displayStream, camStream);
+    }
+  }
+
+  // If the user ends screen sharing from the browser's own "Stop sharing"
+  // control (rather than our Stop button), gracefully finish the recording.
+  function watchForScreenShareEnd(displayStream){
+    const track = displayStream.getVideoTracks()[0];
+    if(!track) return;
+    track.onended = ()=>{
+      if(mediaRecorder && mediaRecorder.state !== 'inactive'){
+        btnStop.click();
+      }
+    };
+  }
+
+  function pickMimeType(hasVideo){
+    const candidates = hasVideo
+      ? ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']
+      : ['audio/webm;codecs=opus','audio/webm'];
+    for(const c of candidates){
+      if(window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(c)) return c;
+    }
+    return hasVideo ? 'video/webm' : 'audio/webm';
+  }
+
+  // ---------- live transcript ----------
+  function setupRecognition(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){
+      transcriptState.textContent = 'unsupported';
+      transcriptBox.innerHTML = '<span class="placeholder">Live transcription isn\'t supported in this browser. Try Chrome or Edge on desktop.</span>';
+      return null;
+    }
+    const r = new SR();
+    r.continuous = true;
+    r.interimResults = true;
+    r.lang = 'en-US';
+    r.onresult = (e)=>{
+      let interim = '';
+      for(let i = e.resultIndex; i < e.results.length; i++){
+        const txt = e.results[i][0].transcript;
+        if(e.results[i].isFinal) liveTranscriptFinal += txt + ' ';
+        else interim += txt;
+      }
+      liveTranscriptInterim = interim;
+      renderTranscript();
+    };
+    r.onerror = (e)=>{
+      if(e.error === 'not-allowed'){
+        transcriptState.textContent = 'mic blocked';
+      } else if(e.error === 'no-speech'){
+        // ignore, keeps listening
+      } else {
+        transcriptState.textContent = e.error;
+      }
+    };
+    r.onend = ()=>{
+      if(recognitionActive){
+        try{ r.start(); }catch(e){} // auto-restart while recording continues
+      }
+    };
+    return r;
+  }
+
+  function renderTranscript(){
+    const full = (liveTranscriptFinal + liveTranscriptInterim).trim();
+    if(!full){
+      transcriptBox.innerHTML = '<span class="placeholder">Listening…</span>';
+      return;
+    }
+    transcriptBox.innerHTML = '<span class="line">' + escapeHtml(full) + '</span>';
+    transcriptBox.scrollTop = transcriptBox.scrollHeight;
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- recording controls ----------
+  btnStart.addEventListener('click', async ()=>{
+    recordedChunks = [];
+    allTracksToStop = [];
+    liveTranscriptFinal = '';
+    liveTranscriptInterim = '';
+    currentBlob = null;
+    previewWrap.classList.remove('show');
+    summaryBox.innerHTML = '<span class="placeholder">Record something with a transcript, then generate a short AI summary and action items.</span>';
+    btnSummarize.disabled = true;
+    if(micWanted){
+      transcriptState.textContent = 'listening';
+      transcriptBox.innerHTML = '<span class="placeholder">Listening…</span>';
+    } else {
+      transcriptState.textContent = 'muted';
+      transcriptBox.innerHTML = '<span class="placeholder">Mic is muted, so live transcription is off for this recording. Turn the mic on before recording to capture a transcript.</span>';
+    }
+
+    setStatus('Starting up — your browser may show more than one permission prompt, one at a time.');
+    let stream;
+    try{
+      stream = await buildStream(mode);
+    }catch(err){
+      setStatus('Permission denied or cancelled: ' + (err.message || err.name), 'error');
+      return;
+    }
+
+    const hasVideo = stream.getVideoTracks().length > 0;
+    currentMime = pickMimeType(hasVideo);
+
+    const recorderOptions = { mimeType: currentMime };
+    if(hasVideo){
+      const settings = stream.getVideoTracks()[0].getSettings ? stream.getVideoTracks()[0].getSettings() : {};
+      const pixels = (settings.width || 1280) * (settings.height || 720);
+      // Roughly scale bitrate with resolution, with a healthy floor for screen/text content.
+      recorderOptions.videoBitsPerSecond = Math.max(6_000_000, Math.round(pixels * 0.12));
+      recorderOptions.audioBitsPerSecond = 128_000;
+    } else {
+      recorderOptions.audioBitsPerSecond = 128_000;
+    }
+
+    try{
+      mediaRecorder = new MediaRecorder(stream, recorderOptions);
+    }catch(err){
+      setStatus('Could not start recorder: ' + err.message, 'error');
+      return;
+    }
+
+    mediaRecorder.ondataavailable = (e)=>{ if(e.data && e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = onRecorderStop;
+
+    mediaRecorder.start(500);
+    startWaveLoop(stream);
+
+    if(micWanted){
+      recognition = setupRecognition();
+      if(recognition){
+        recognitionActive = true;
+        try{ recognition.start(); }catch(e){}
+      }
+    }
+
+    recordStartTs = Date.now();
+    pausedAccumMs = 0;
+    isPaused = false;
+    timerInterval = setInterval(updateTimer, 250);
+    updateTimer();
+
+    const modeLabel = document.querySelector('.mode-btn.active').textContent;
+    stageTitle.textContent = `recording-${mode}-${new Date().toISOString().slice(0,16).replace('T','-')}`;
+    studioBadge.className = 'rec-badge live';
+    studioBadge.innerHTML = '<span class="rdot"></span>RECORDING';
+    setStatus(`Recording ${modeLabel.toLowerCase()}…`, 'ok');
+
+    btnStart.disabled = true;
+    btnPause.disabled = false;
+    btnStop.disabled = false;
+    btnPause.textContent = 'Pause';
+    modeRow.querySelectorAll('.mode-btn').forEach(b=>b.disabled = true);
+  });
+
+  btnPause.addEventListener('click', ()=>{
+    if(!mediaRecorder) return;
+    if(mediaRecorder.state === 'recording'){
+      mediaRecorder.pause();
+      isPaused = true;
+      pauseStartTs = Date.now();
+      btnPause.textContent = 'Resume';
+      studioBadge.className = 'rec-badge idle';
+      studioBadge.innerHTML = '<span class="rdot"></span>PAUSED';
+      setStatus('Paused. Click Resume to continue.');
+      if(recognition){ recognitionActive = false; try{ recognition.stop(); }catch(e){} }
+    } else if(mediaRecorder.state === 'paused'){
+      mediaRecorder.resume();
+      isPaused = false;
+      pausedAccumMs += Date.now() - pauseStartTs;
+      btnPause.textContent = 'Pause';
+      studioBadge.className = 'rec-badge live';
+      studioBadge.innerHTML = '<span class="rdot"></span>RECORDING';
+      setStatus('Recording resumed.', 'ok');
+      if(recognition){ recognitionActive = true; try{ recognition.start(); }catch(e){} }
+    }
+  });
+
+  btnStop.addEventListener('click', ()=>{
+    if(!mediaRecorder) return;
+    lastDurationMs = isPaused
+      ? Math.max(0, pauseStartTs - recordStartTs - pausedAccumMs)
+      : Math.max(0, Date.now() - recordStartTs - pausedAccumMs);
+    if(mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    clearInterval(timerInterval);
+    stopWaveLoop();
+    if(compositeRAF){ cancelAnimationFrame(compositeRAF); compositeRAF = null; }
+    if(recognition){ recognitionActive = false; try{ recognition.stop(); }catch(e){} }
+    allTracksToStop.forEach(t=>{ try{ t.stop(); }catch(e){} });
+    micTrackRef = null;
+
+    studioBadge.className = 'rec-badge idle';
+    studioBadge.innerHTML = '<span class="rdot"></span>READY';
+    btnStart.disabled = false;
+    btnPause.disabled = true;
+    btnStop.disabled = true;
+    modeRow.querySelectorAll('.mode-btn').forEach(b=>b.disabled = false);
+  });
+
+  function downloadRecording(rec){
+    if(!rec || !rec.url){ setStatus('Nothing to download yet — record something first.', 'error'); return; }
+    try{
+      const a = document.createElement('a');
+      a.href = rec.url;
+      a.download = rec.name;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }catch(err){
+      // fallback: open the recording in a new tab so the browser's native
+      // save controls can be used if the scripted download was blocked
+      window.open(rec.url, '_blank', 'noopener');
+    }
+  }
+
+  btnDownload.addEventListener('click', ()=> convertRecording(activeRec, btnDownload));
+  btnDownloadOriginal.addEventListener('click', ()=> downloadRecording(activeRec));
+
+  // ---------- convert to MP4 / MP3 (runs fully in the browser via ffmpeg.wasm) ----------
+  let ffmpegInstance = null;
+  let ffmpegLoadPromise = null;
+
+  function loadScript(src){
+    return new Promise((resolve, reject)=>{
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = ()=> reject(new Error('Could not load ' + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function getFfmpeg(onProgressMsg){
+    if(ffmpegInstance) return ffmpegInstance;
+    if(!ffmpegLoadPromise){
+      ffmpegLoadPromise = (async ()=>{
+        onProgressMsg('Loading conversion engine (one-time download, ~25 MB)…');
+
+        // Local file:// pages (and many http pages without special headers) can
+        // never be "cross-origin isolated", so the real SharedArrayBuffer is
+        // unavailable. The single-threaded ffmpeg core doesn't actually need real
+        // shared memory, but its generated code references the bare identifier
+        // without a typeof-guard in some builds, which throws before that dead
+        // code path is ever reached. A harmless stand-in prevents that crash.
+        if(typeof window.SharedArrayBuffer === 'undefined'){
+          window.SharedArrayBuffer = ArrayBuffer;
+        }
+
+        if(!window.FFmpeg){
+          await loadScript('https://unpkg.com/@ffmpeg/ffmpeg@0.10.1/dist/ffmpeg.min.js');
+        }
+        const { createFFmpeg } = window.FFmpeg;
+        const instance = createFFmpeg({
+          log: false,
+          corePath: 'https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js'
+        });
+        await instance.load();
+        ffmpegInstance = instance;
+        return instance;
+      })();
+    }
+    return ffmpegLoadPromise;
+  }
+
+  async function convertRecording(rec, buttonEl){
+    if(!rec || !rec.blob){ setStatus('Nothing to convert yet — record something first.', 'error'); return; }
+    const targetExt = rec.hasVideo ? 'mp4' : 'mp3';
+    const outName = rec.name.replace(/\.webm$/i, '') + '.' + targetExt;
+
+    const originalLabel = buttonEl ? buttonEl.textContent : null;
+    if(buttonEl){ buttonEl.disabled = true; buttonEl.textContent = 'Converting…'; }
+    const report = (msg, kind)=>{
+      convertStatus.textContent = msg;
+      convertStatus.className = 'studio-status' + (kind ? ' ' + kind : '');
+    };
+
+    try{
+      const ffmpeg = await getFfmpeg(report);
+      report('Converting to ' + targetExt.toUpperCase() + '… this runs in your browser and can take about as long as the recording itself.');
+
+      const { fetchFile } = window.FFmpeg;
+      const inputName = 'input.webm';
+      ffmpeg.FS('writeFile', inputName, await fetchFile(rec.blob));
+
+      if(rec.hasVideo){
+        await ffmpeg.run('-i', inputName, '-vf', 'scale=\'min(1280,iw)\':-2', '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '26', '-c:a', 'aac', '-movflags', '+faststart', 'output.mp4');
+        var data = ffmpeg.FS('readFile', 'output.mp4');
+        var outBlob = new Blob([data.buffer], { type: 'video/mp4' });
+      } else {
+        await ffmpeg.run('-i', inputName, '-c:a', 'libmp3lame', '-q:a', '2', 'output.mp3');
+        var data = ffmpeg.FS('readFile', 'output.mp3');
+        var outBlob = new Blob([data.buffer], { type: 'audio/mpeg' });
+      }
+
+      const outUrl = URL.createObjectURL(outBlob);
+      const a = document.createElement('a');
+      a.href = outUrl; a.download = outName; a.rel = 'noopener';
+      document.body.appendChild(a); a.click(); a.remove();
+
+      report(`Converted and downloaded "${outName}" (${(outBlob.size/(1024*1024)).toFixed(1)} MB).`, 'ok');
+    }catch(err){
+      ffmpegLoadPromise = null; // allow retrying instead of permanently failing every future attempt
+      ffmpegInstance = null;
+      const msg = (err && err.message) || String(err);
+      if(msg.includes('SharedArrayBuffer') || msg.includes('crossOriginIsolated')){
+        report('Conversion engine couldn\'t start in this browser session. Please try again — if it keeps failing, use "Download original .webm" instead, which always works.', 'error');
+      } else if(msg.toLowerCase().includes('memory')){
+        report('Conversion ran out of memory — this can happen with longer or higher-resolution HD recordings, since browser-side conversion has a fixed memory ceiling. Try a shorter recording, or use "Download original .webm" instead, which always works regardless of length.', 'error');
+      } else {
+        report('Conversion failed: ' + msg + '. This needs internet access to fetch the conversion engine the first time — if you\'re offline or on a restricted network, this won\'t work. "Download original .webm" always works as a fallback.', 'error');
+      }
+    }finally{
+      if(buttonEl){ buttonEl.disabled = false; buttonEl.textContent = originalLabel; }
+    }
+  }
+
+  function updateDownloadLabels(rec){
+    if(!rec) return;
+    btnDownload.textContent = rec.hasVideo ? 'Try MP4 conversion (experimental, best under ~1 min)' : 'Try MP3 conversion (experimental)';
+    btnDownloadOriginal.textContent = rec.hasVideo ? '⬇ Download (full HD .webm)' : '⬇ Download (.webm)';
+  }
+
+  function formatMs(ms){
+    const s = Math.max(0, Math.round(ms/1000));
+    const mm = Math.floor(s/60), ss = s%60;
+    return String(mm).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
+  }
+
+  function captureThumbnail(videoUrl){
+    return new Promise((resolve, reject)=>{
+      const v = document.createElement('video');
+      v.muted = true;
+      v.src = videoUrl;
+      v.addEventListener('loadeddata', ()=>{
+        // Seek a little into the clip so we don't grab a blank first frame.
+        v.currentTime = Math.min(0.5, (v.duration || 1) * 0.1);
+      });
+      v.addEventListener('seeked', ()=>{
+        try{
+          const canvas = document.createElement('canvas');
+          canvas.width = 160; canvas.height = 100;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.7));
+        } catch(e){ reject(e); }
+      });
+      v.addEventListener('error', reject);
+    });
+  }
+
+  async function onRecorderStop(){
+    let rawBlob = new Blob(recordedChunks, { type: currentMime });
+    setStatus('Finalizing recording…');
+    currentBlob = await fixWebmDuration(rawBlob, lastDurationMs);
+    const url = URL.createObjectURL(currentBlob);
+    const hasVideo = currentMime.startsWith('video');
+
+    previewWrap.classList.add('show');
+    if(hasVideo){
+      previewVideo.style.display = 'block';
+      previewAudio.style.display = 'none';
+      previewVideo.src = url;
+    } else {
+      previewVideo.style.display = 'none';
+      previewAudio.style.display = 'block';
+      previewAudio.src = url;
+    }
+
+    const durationLabel = formatMs(lastDurationMs);
+    const transcript = (liveTranscriptFinal + liveTranscriptInterim).trim();
+    const sizeMb = (currentBlob.size / (1024*1024)).toFixed(1);
+    const resolutionLabel = (hasVideo && lastCaptureRes && lastCaptureRes.width) ? `${lastCaptureRes.width}×${lastCaptureRes.height}` : null;
+    const rec = {
+      id: recIdCounter++,
+      name: stageTitle.textContent + (hasVideo ? '.webm' : '.webm'),
+      mode: mode,
+      url: url,
+      blob: currentBlob,
+      duration: durationLabel,
+      size: sizeMb + ' MB',
+      transcript: transcript,
+      hasVideo: hasVideo,
+      resolution: resolutionLabel,
+      encodedResolution: null, // filled in below once the browser decodes the actual saved file
+      comments: [],
+      deadlineAt: null,
+      createdAt: Date.now(),
+      thumbnail: null
+    };
+    recordings.unshift(rec);
+    activeRec = rec;
+    updateDownloadLabels(rec);
+    renderLibrary();
+    renderComments(rec);
+    refreshTimerBadge(rec);
+    timerSelect.value = '';
+    if(hasVideo){
+      captureThumbnail(url).then(dataUrl=>{
+        rec.thumbnail = dataUrl;
+        renderLibrary();
+      }).catch(()=>{ /* thumbnail is a nice-to-have, ignore failures */ });
+
+      // The capture track's resolution (above) and the MediaRecorder's actually
+      // ENCODED resolution can differ — the real-time encoder can silently
+      // downscale to keep up, independent of what was captured. Check the real,
+      // decoded output so the diagnostic reflects what the saved file actually is.
+      const probe = document.createElement('video');
+      probe.preload = 'metadata';
+      probe.src = url;
+      probe.onloadedmetadata = ()=>{
+        const ew = probe.videoWidth, eh = probe.videoHeight;
+        if(ew && eh){
+          rec.encodedResolution = `${ew}×${eh}`;
+          const mismatch = lastCaptureRes && lastCaptureRes.width && Math.abs(ew - lastCaptureRes.width) > 4;
+          const small = ew < 1280;
+          if(mismatch || small){
+            setStatus(
+              `Saved "${rec.name}" — captured at ${resolutionLabel || '?'}, but the encoder actually saved this file at ${ew}×${eh}` +
+              (small ? ' (lower than requested — your browser\'s real-time encoder likely couldn\'t keep up at this resolution/frame rate on this device). Try recording a shorter clip, closing other heavy apps/tabs, or lowering the frame rate further.' : '.'),
+              small ? 'error' : 'ok'
+            );
+          }
+          renderLibrary();
+        }
+      };
+    }
+
+    if(transcript){
+      btnSummarize.disabled = false;
+      transcriptState.textContent = 'captured';
+    } else {
+      transcriptState.textContent = 'none captured';
+    }
+
+    const resNote = resolutionLabel
+      ? (lastCaptureRes.width < 1280
+          ? ` Captured at only ${resolutionLabel} — lower than the 1080p requested. Try "Entire Screen" instead of a tab/window, and check your display scaling.`
+          : ` Captured at ${resolutionLabel} (checking actual saved resolution…).`)
+      : '';
+    setStatus(`Saved "${rec.name}" (${rec.size}, ${rec.duration}).${resNote} Preview, download, or summarize below.`, resolutionLabel && lastCaptureRes.width < 1280 ? 'error' : 'ok');
+    studioTimer.textContent = '00:00';
+
+    btnSummarize.onclick = ()=> summarize(rec);
+
+    openDownloadModal(rec);
+  }
+
+  // ---------- download confirm modal ----------
+  function openDownloadModal(rec){
+    modalMsg.textContent = `"${rec.name}" (${rec.size}, ${rec.duration}) is ready. Download it now?`;
+    modalYes.textContent = 'Download';
+    modalOriginal.textContent = rec.hasVideo
+      ? 'or try MP4 conversion (experimental, best under ~1 min)'
+      : 'or try MP3 conversion (experimental)';
+    downloadModal.classList.add('show');
+    modalYes.onclick = ()=>{
+      downloadModal.classList.remove('show');
+      downloadRecording(rec);
+    };
+    modalNo.onclick = ()=>{
+      downloadModal.classList.remove('show');
+    };
+    modalOriginal.onclick = ()=>{
+      downloadModal.classList.remove('show');
+      convertRecording(rec, btnDownload);
+    };
+  }
+  downloadModal.addEventListener('click', (e)=>{
+    if(e.target === downloadModal) downloadModal.classList.remove('show');
+  });
+
+  // ---------- library ----------
+  function dateGroupLabel(ts){
+    const d = new Date(ts);
+    const now = new Date();
+    const isToday = d.toDateString() === now.toDateString();
+    const yest = new Date(now); yest.setDate(now.getDate()-1);
+    const isYesterday = d.toDateString() === yest.toDateString();
+    if(isToday) return 'Today';
+    if(isYesterday) return 'Yesterday';
+    return d.toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' });
+  }
+
+  function renderLibrary(){
+    libCount.textContent = recordings.length + ' in this session';
+    if(recordings.length === 0){
+      library.innerHTML = '<div class="library-empty">Nothing recorded yet — your first recording will show up here.</div>';
+      return;
+    }
+
+    // Filter
+    const filterVal = libFilter ? libFilter.value : 'anytime';
+    const now = Date.now();
+    let filtered = recordings.filter(rec=>{
+      if(filterVal === 'anytime') return true;
+      const age = now - (rec.createdAt || now);
+      if(filterVal === 'today') return age <= 24*60*60*1000 && new Date(rec.createdAt).toDateString() === new Date().toDateString();
+      if(filterVal === 'week') return age <= 7*24*60*60*1000;
+      return true;
+    });
+
+    if(filtered.length === 0){
+      library.innerHTML = '<div class="library-empty">No recordings match this filter.</div>';
+      return;
+    }
+
+    // Sort
+    const sortVal = libSort ? libSort.value : 'newest';
+    filtered = filtered.slice().sort((a,b)=>{
+      const at = a.createdAt || 0, bt = b.createdAt || 0;
+      return sortVal === 'oldest' ? at - bt : bt - at;
+    });
+
+    library.innerHTML = '';
+    let lastGroup = null;
+
+    filtered.forEach(rec=>{
+      const groupLabel = dateGroupLabel(rec.createdAt || Date.now());
+      if(groupLabel !== lastGroup){
+        const heading = document.createElement('div');
+        heading.className = 'lib-group-label';
+        heading.textContent = groupLabel;
+        library.appendChild(heading);
+        lastGroup = groupLabel;
+      }
+
+      const card = document.createElement('div');
+      card.className = 'rec-card';
+
+      const icon = document.createElement('div');
+      icon.className = 'rec-icon';
+      if(rec.thumbnail){
+        const img = document.createElement('img');
+        img.src = rec.thumbnail;
+        img.alt = '';
+        icon.appendChild(img);
+      } else {
+        icon.textContent = rec.hasVideo ? '▶' : '♪';
+      }
+
+      const meta = document.createElement('div');
+      meta.className = 'rec-meta';
+      const commentCount = rec.comments && rec.comments.length ? ` · ${rec.comments.length} comment${rec.comments.length===1?'':'s'}` : '';
+      const timeLabel = rec.createdAt ? new Date(rec.createdAt).toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' }) : '';
+      meta.innerHTML = `<div class="name">${escapeHtml(rec.name)}</div><div class="sub">${timeLabel} · ${rec.duration} · ${rec.size} · ${rec.mode}${rec.resolution ? ' · ' + rec.resolution : ''}${rec.transcript ? ' · transcript' : ''}${commentCount}</div><div class="card-timer" data-rec-id="${rec.id}" style="margin-top:6px;"></div>`;
+
+      const ready = document.createElement('div');
+      ready.className = 'rec-ready';
+      ready.textContent = 'Ready to download';
+
+      const actions = document.createElement('div');
+      actions.className = 'rec-actions';
+
+      const playBtn = document.createElement('button');
+      playBtn.textContent = 'Play';
+      playBtn.onclick = ()=>{
+        previewWrap.classList.add('show');
+        if(rec.hasVideo){
+          previewVideo.style.display = 'block'; previewAudio.style.display = 'none';
+          previewVideo.src = rec.url; previewVideo.play();
+        } else {
+          previewVideo.style.display = 'none'; previewAudio.style.display = 'block';
+          previewAudio.src = rec.url; previewAudio.play();
+        }
+        previewWrap.scrollIntoView({ behavior:'smooth', block:'center' });
+        activeRec = rec;
+        updateDownloadLabels(rec);
+        renderComments(rec);
+        refreshTimerBadge(rec);
+        timerSelect.value = rec.deadlineAt ? '' : '';
+        if(rec.transcript){ btnSummarize.disabled = false; btnSummarize.onclick = ()=> summarize(rec); }
+      };
+
+      const originalBtn = document.createElement('button');
+      originalBtn.textContent = 'Download .webm';
+      originalBtn.onclick = ()=> downloadRecording(rec);
+
+      const dlBtn = document.createElement('button');
+      dlBtn.textContent = rec.hasVideo ? 'Try MP4 (experimental)' : 'Try MP3 (experimental)';
+      dlBtn.onclick = ()=>{
+        activeRec = rec;
+        convertRecording(rec, dlBtn);
+      };
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Delete';
+      delBtn.className = 'danger';
+      delBtn.onclick = ()=>{
+        URL.revokeObjectURL(rec.url);
+        recordings = recordings.filter(r=>r.id !== rec.id);
+        if(activeRec && activeRec.id === rec.id) activeRec = null;
+        renderLibrary();
+      };
+
+      actions.append(playBtn, originalBtn, dlBtn, delBtn);
+      card.append(icon, meta, ready, actions);
+      library.appendChild(card);
+    });
+  }
+
+  // ---------- AI summary (paid feature) ----------
+  const UNLOCK_STORAGE_KEY = 'fsr_unlock_token_v1';
+
+  function getUnlockToken(){
+    try{
+      const raw = localStorage.getItem(UNLOCK_STORAGE_KEY);
+      if(!raw) return null;
+      const parsed = JSON.parse(raw);
+      if(!parsed.token || Date.now() > parsed.expires) return null;
+      return parsed.token;
+    }catch{ return null; }
+  }
+
+  function setUnlockToken(token, expires){
+    localStorage.setItem(UNLOCK_STORAGE_KEY, JSON.stringify({ token, expires }));
+  }
+
+  function isUnlocked(){
+    return !!getUnlockToken();
+  }
+
+  function refreshUnlockUI(){
+    if(isUnlocked()){
+      btnUnlock.style.display = 'none';
+    } else {
+      btnUnlock.style.display = 'inline-flex';
+    }
+  }
+
+  btnUnlock.onclick = async ()=>{
+    btnUnlock.disabled = true;
+    btnUnlock.textContent = 'Redirecting…';
+    try{
+      const resp = await fetch('/.netlify/functions/create-checkout-session', { method: 'POST' });
+      if(!resp.ok) throw new Error('status ' + resp.status);
+      const { url } = await resp.json();
+      window.location.href = url;
+    }catch(err){
+      btnUnlock.disabled = false;
+      btnUnlock.textContent = 'Unlock AI Summaries — $5';
+      summaryBox.className = 'summary-box';
+      summaryBox.innerHTML = '<span class="placeholder">Couldn\'t start checkout right now. Please try again in a moment.</span>';
+    }
+  };
+
+  // If we just came back from Stripe (?session_id=...), verify and store the unlock token.
+  (async function handleCheckoutReturn(){
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
+    if(!sessionId) return;
+    summaryBox.className = 'summary-box';
+    summaryBox.innerHTML = '<span class="placeholder">Confirming your purchase…</span>';
+    try{
+      const resp = await fetch('/.netlify/functions/verify-session?session_id=' + encodeURIComponent(sessionId));
+      if(!resp.ok) throw new Error('verification failed');
+      const { token, expires } = await resp.json();
+      setUnlockToken(token, expires);
+      summaryBox.innerHTML = '<span class="placeholder">AI Summaries unlocked. Record something with a transcript, then hit Generate.</span>';
+    }catch{
+      summaryBox.innerHTML = '<span class="placeholder">We couldn\'t confirm that payment. If you were charged, contact support and we\'ll sort it out.</span>';
+    }finally{
+      // Clean the session_id out of the URL so refreshes don't re-trigger this.
+      window.history.replaceState({}, '', window.location.pathname);
+      refreshUnlockUI();
+    }
+  })();
+
+  async function summarize(rec){
+    if(!rec.transcript){
+      summaryBox.innerHTML = '<span class="placeholder">No transcript was captured for this recording.</span>';
+      return;
+    }
+    if(!isUnlocked()){
+      summaryBox.className = 'summary-box';
+      summaryBox.innerHTML = '<span class="placeholder">AI Summaries are a paid feature. Click "Unlock AI Summaries" above to get access.</span>';
+      refreshUnlockUI();
+      return;
+    }
+    summaryBox.className = 'summary-box';
+    summaryBox.innerHTML = '<span class="placeholder">Generating summary…</span>';
+    btnSummarize.disabled = true;
+    try{
+      const resp = await fetch('/.netlify/functions/summarize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-unlock-token': getUnlockToken() || ''
+        },
+        body: JSON.stringify({ transcript: rec.transcript })
+      });
+      if(resp.status === 402){
+        localStorage.removeItem(UNLOCK_STORAGE_KEY);
+        refreshUnlockUI();
+        throw new Error('Your unlock has expired. Please unlock again.');
+      }
+      if(!resp.ok){
+        throw new Error('server responded with status ' + resp.status);
+      }
+      const data = await resp.json();
+      summaryBox.className = 'summary-box filled';
+      summaryBox.textContent = data.text || 'No summary text returned.';
+    }catch(err){
+      summaryBox.className = 'summary-box';
+      summaryBox.innerHTML = '<span class="placeholder">Couldn\'t generate a summary right now (' + escapeHtml(err.message) + ').</span>';
+    }finally{
+      btnSummarize.disabled = false;
+    }
+  }
+
+  // ---------- timestamped comments ----------
+  function activePlayer(){
+    return activeRec && activeRec.hasVideo ? previewVideo : previewAudio;
+  }
+
+  function currentPlayerTime(){
+    const p = activePlayer();
+    return p && !isNaN(p.currentTime) ? p.currentTime : 0;
+  }
+
+  [previewVideo, previewAudio].forEach(p=>{
+    p.addEventListener('timeupdate', ()=>{
+      if(document.activeElement !== commentInput){
+        commentTimeLabel.textContent = formatMs(currentPlayerTime() * 1000);
+      }
+    });
+  });
+
+  btnAddComment.onclick = ()=>{
+    if(!activeRec){ return; }
+    commentTimeLabel.textContent = formatMs(currentPlayerTime() * 1000);
+    commentInputRow.classList.add('show');
+    commentInput.value = '';
+    commentInput.focus();
+  };
+  btnCommentCancel.onclick = ()=>{
+    commentInputRow.classList.remove('show');
+  };
+  btnCommentSave.onclick = ()=> saveComment();
+  commentInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') saveComment(); });
+
+  function saveComment(){
+    const text = commentInput.value.trim();
+    if(!text || !activeRec) return;
+    activeRec.comments.push({ time: currentPlayerTime(), text });
+    activeRec.comments.sort((a,b)=> a.time - b.time);
+    commentInputRow.classList.remove('show');
+    renderComments(activeRec);
+    renderLibrary();
+  }
+
+  function renderComments(rec){
+    if(!rec || !rec.comments || rec.comments.length === 0){
+      commentList.innerHTML = '<span class="comment-empty">No comments yet — play the recording and pin feedback to a moment.</span>';
+      return;
+    }
+    commentList.innerHTML = '';
+    rec.comments.forEach(c=>{
+      const item = document.createElement('div');
+      item.className = 'comment-item';
+      item.innerHTML = `<span class="comment-time">${formatMs(c.time*1000)}</span><span class="comment-text">${escapeHtml(c.text)}</span>`;
+      item.onclick = ()=>{
+        const p = activePlayer();
+        if(p){ p.currentTime = c.time; p.play(); }
+      };
+      commentList.appendChild(item);
+    });
+  }
+
+  // ---------- response deadline / timer ----------
+  timerSelect.onchange = ()=>{
+    if(!activeRec) return;
+    const ms = timerSelect.value ? parseInt(timerSelect.value, 10) : null;
+    activeRec.deadlineAt = ms ? Date.now() + ms : null;
+    refreshTimerBadge(activeRec);
+    renderLibrary();
+  };
+
+  function formatCountdown(msLeft){
+    if(msLeft <= 0) return 'Response window closed';
+    const totalMin = Math.ceil(msLeft / 60000);
+    if(totalMin < 60) return `Response needed in ${totalMin}m`;
+    const hrs = Math.floor(totalMin / 60);
+    if(hrs < 24) return `Response needed in ${hrs}h`;
+    return `Response needed in ${Math.floor(hrs/24)}d`;
+  }
+
+  function refreshTimerBadge(rec){
+    if(!rec || !rec.deadlineAt){
+      timerBadge.style.display = 'none';
+      return;
+    }
+    const msLeft = rec.deadlineAt - Date.now();
+    timerBadge.style.display = 'inline-flex';
+    timerBadge.textContent = '⏱ ' + formatCountdown(msLeft);
+    timerBadge.className = 'timer-badge' + (msLeft <= 0 ? ' expired' : msLeft < 3600000 ? ' urgent' : '');
+  }
+
+  // Ticks every 30s to keep countdowns (studio panel + library cards) fresh without a full re-render.
+  deadlineInterval = setInterval(()=>{
+    if(activeRec) refreshTimerBadge(activeRec);
+    document.querySelectorAll('.card-timer[data-rec-id]').forEach(el=>{
+      const rec = recordings.find(r=> String(r.id) === el.getAttribute('data-rec-id'));
+      if(!rec || !rec.deadlineAt){ el.innerHTML=''; return; }
+      const msLeft = rec.deadlineAt - Date.now();
+      const cls = msLeft <= 0 ? 'expired' : msLeft < 3600000 ? 'urgent' : '';
+      el.innerHTML = `<span class="timer-badge ${cls}">⏱ ${formatCountdown(msLeft)}</span>`;
+    });
+  }, 1000);
+
+  // ---------- product tour tabs ----------
+  (function initTourTabs(){
+    const tabs = document.querySelectorAll('#tourTabs .tour-tab');
+    const panels = document.querySelectorAll('#tourPanels .tour-panel');
+    let autoRotate = null;
+
+    function activate(name){
+      tabs.forEach(t=> t.classList.toggle('active', t.dataset.tab === name));
+      panels.forEach(p=> p.classList.toggle('active', p.dataset.panel === name));
+    }
+    function startAutoRotate(){
+      const order = ['record','transcribe','comment','share'];
+      let i = 0;
+      autoRotate = setInterval(()=>{
+        i = (i+1) % order.length;
+        activate(order[i]);
+      }, 4200);
+    }
+    tabs.forEach(t=>{
+      t.addEventListener('click', ()=>{
+        clearInterval(autoRotate);
+        activate(t.dataset.tab);
+        startAutoRotate();
+      });
+    });
+    startAutoRotate();
+  })();
+
+  refreshUnlockUI();
+  if(libFilter) libFilter.addEventListener('change', renderLibrary);
+  if(libSort) libSort.addEventListener('change', renderLibrary);
+  renderLibrary();
+})();
+</script>
+
+</body>
+</html>

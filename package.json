@@ -1,0 +1,9 @@
+{
+  "name": "free-screen-recording-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Free screen recorder with a paid AI-summary tier (Netlify Functions + Stripe).",
+  "dependencies": {
+    "stripe": "^16.0.0"
+  }
+}
