@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3294K4VF4Y"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-3294K4VF4Y');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FreeScreenRecording — Free Screen Recorder, Right In Your Browser</title>
@@ -843,6 +834,41 @@
     .studio-grid2{grid-template-columns:1fr;}
   }
 
+  /* ---------- STUDIO SWITCHER (Recording / Screenshot tabs) ---------- */
+  /* A compact segmented control rather than two stacked full sections or an extra
+     "open panel" click — one action (click or arrow key) gets you to either studio. */
+  .studio-switcher{
+    display:inline-flex; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;
+    border:1px solid var(--line-strong); border-radius:999px; background:var(--ink-2);
+    padding:4px; gap:4px; margin-bottom:22px; box-shadow:var(--shadow-soft);
+  }
+  .studio-tab{
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    padding:12px 22px; border-radius:999px; border:none; background:transparent;
+    font-family:'Manrope',sans-serif; font-weight:700; font-size:14px; color:var(--paper-dim);
+    cursor:pointer; white-space:nowrap; transition:color .25s ease, background .25s ease;
+  }
+  .studio-tab .stab-icon{
+    width:8px; height:8px; border-radius:50%; background:currentColor; flex:none; opacity:.55;
+    transition:opacity .25s ease;
+  }
+  .studio-tab .stab-icon.shape{ border-radius:2px; }
+  .studio-tab:hover{ color:var(--paper); }
+  .studio-tab[aria-selected="true"]{ background:var(--accent); color:var(--ink); }
+  .studio-tab[aria-selected="true"] .stab-icon{ opacity:1; }
+  .studio-tab:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  /* panels: only the active one renders; switch reuses the existing tourIn keyframe */
+  .studio-panel{ display:none; }
+  .studio-panel.active{ display:block; animation:tourIn .4s ease both; }
+  @media (prefers-reduced-motion: reduce){
+    .studio-panel.active{ animation:none; }
+  }
+  @media (max-width:600px){
+    .studio-switcher{ width:100%; }
+    .studio-tab{ flex:1; font-size:13px; padding:11px 10px; }
+  }
+
   /* ---------- SCROLL REVEAL & POLISH ---------- */
   .reveal{
     opacity:0; transform:translateY(28px);
@@ -1248,74 +1274,16 @@
       </div>
     </div>
 
-    <div class="studio-shell reveal" id="shotStudio" style="margin-bottom:26px;">
-      <div class="studio-head">
-        <div>
-          <h3>Screenshot studio</h3>
-          <p>Rectangle, window, full screen, or freeform — capture a screenshot right from your browser, with the same options as Windows Snipping Tool.</p>
-        </div>
-        <span class="studio-badge"><span class="sdot"></span>Runs locally in this tab</span>
-      </div>
-
-      <div class="studio-body">
-        <div class="snip-toolbar" id="snipToolbar">
-          <button class="btn btn-primary" id="btnSnipNew" style="font-size:13px; padding:9px 16px;">+ New</button>
-
-          <div class="snip-dropdown" id="shapeDropdown">
-            <button class="snip-btn" id="btnShapeMenu" type="button" aria-haspopup="true" title="Choose a capture shape">
-              <span class="mi" id="shapeIcon">▭</span><span id="shapeLabel">Rectangle</span><span class="snip-caret">▾</span>
-            </button>
-            <div class="snip-menu" id="shapeMenu" role="menu">
-              <button type="button" data-shape="rectangle" class="active"><span class="mi">▭</span>Rectangle</button>
-              <button type="button" data-shape="window"><span class="mi">▢</span>Window</button>
-              <button type="button" data-shape="fullscreen"><span class="mi">⬜</span>Full screen</button>
-              <button type="button" data-shape="freeform"><span class="mi">✎</span>Freeform</button>
-            </div>
-          </div>
-
-          <button class="snip-btn" id="btnGoVideo" type="button" title="Switch to video recording"><span class="mi">🎥</span>Record video instead</button>
-
-          <span class="snip-sep"></span>
-
-          <div class="snip-dropdown" id="delayDropdown">
-            <button class="snip-btn" id="btnDelayMenu" type="button" aria-haspopup="true" title="Set a delay before capture">
-              <span class="mi" id="delayIcon">⏱</span><span id="delayLabel">No delay</span><span class="snip-caret">▾</span>
-            </button>
-            <div class="snip-menu" id="delayMenu" role="menu">
-              <button type="button" data-delay="0" class="active"><span class="mi">⏱</span>No delay</button>
-              <button type="button" data-delay="3"><span class="mi">⏱</span>3-second delay</button>
-              <button type="button" data-delay="5"><span class="mi">⏱</span>5-second delay</button>
-              <button type="button" data-delay="10"><span class="mi">⏱</span>10-second delay</button>
-            </div>
-          </div>
-
-          <button class="snip-btn" id="btnTextExtract" type="button" title="Text extractor — capture and pull the text out of it"><span class="mi">▤</span>Text extractor</button>
-
-          <span class="snip-sep" id="liveSep" style="display:none;"></span>
-          <span class="snip-btn" id="liveBadge" style="display:none; color:var(--accent); cursor:default;"><span class="mi">●</span><span id="liveBadgeLabel">Sharing active</span></span>
-          <button class="snip-btn" id="btnStopSharing" type="button" style="display:none; color:#F0928A;" title="Stop sharing your screen with this site">Stop sharing</button>
-        </div>
-
-        <div class="snip-stage" id="snipStage">
-          <div class="snip-hint" id="snipHint">
-            Click <b>+ New</b> above to start a snip<br>
-            <span style="opacity:.75;">Your browser will ask what to share the first time — after that, snip as many times as you like without being asked again.</span><br>
-            <span style="opacity:.75;">Shape: <b id="snipHintShape">Rectangle</b> · Delay: <b id="snipHintDelay">No delay</b></span>
-          </div>
-        </div>
-
-        <div class="studio-status" id="snipStatus"></div>
-
-        <div>
-          <div class="panel-label"><span>Your screenshots</span><span id="shotCount">0 in this session</span></div>
-          <div class="shot-grid" id="shotLibrary">
-            <div class="library-empty">Nothing captured yet — your first screenshot will show up here.</div>
-          </div>
-        </div>
-      </div>
+    <div class="studio-switcher reveal" role="tablist" aria-label="Choose a studio" id="studioSwitcher">
+      <button class="studio-tab" id="tabRecording" role="tab" aria-selected="true" aria-controls="videoStudio" tabindex="0">
+        <span class="stab-icon" aria-hidden="true"></span> Recording studio
+      </button>
+      <button class="studio-tab" id="tabScreenshot" role="tab" aria-selected="false" aria-controls="shotStudio" tabindex="-1">
+        <span class="stab-icon shape" aria-hidden="true"></span> Screenshot studio
+      </button>
     </div>
 
-    <div class="studio-shell reveal" id="videoStudio">
+    <div class="studio-shell studio-panel active" id="videoStudio" role="tabpanel" aria-labelledby="tabRecording" tabindex="0">
       <div class="studio-head">
         <div>
           <h3>Recording studio</h3>
@@ -1457,6 +1425,73 @@
               </ul>
               <p class="reality-footnote">These need real accounts, a database, and OAuth — which this static page doesn't have. Recordings also live only in this browser tab and are lost on refresh.</p>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="studio-shell studio-panel" id="shotStudio" role="tabpanel" aria-labelledby="tabScreenshot" tabindex="0">
+      <div class="studio-head">
+        <div>
+          <h3>Screenshot studio</h3>
+          <p>Rectangle, window, full screen, or freeform — capture a screenshot right from your browser, with the same options as Windows Snipping Tool.</p>
+        </div>
+        <span class="studio-badge"><span class="sdot"></span>Runs locally in this tab</span>
+      </div>
+
+      <div class="studio-body">
+        <div class="snip-toolbar" id="snipToolbar">
+          <button class="btn btn-primary" id="btnSnipNew" style="font-size:13px; padding:9px 16px;">+ New</button>
+
+          <div class="snip-dropdown" id="shapeDropdown">
+            <button class="snip-btn" id="btnShapeMenu" type="button" aria-haspopup="true" title="Choose a capture shape">
+              <span class="mi" id="shapeIcon">▭</span><span id="shapeLabel">Rectangle</span><span class="snip-caret">▾</span>
+            </button>
+            <div class="snip-menu" id="shapeMenu" role="menu">
+              <button type="button" data-shape="rectangle" class="active"><span class="mi">▭</span>Rectangle</button>
+              <button type="button" data-shape="window"><span class="mi">▢</span>Window</button>
+              <button type="button" data-shape="fullscreen"><span class="mi">⬜</span>Full screen</button>
+              <button type="button" data-shape="freeform"><span class="mi">✎</span>Freeform</button>
+            </div>
+          </div>
+
+          <button class="snip-btn" id="btnGoVideo" type="button" title="Switch to video recording"><span class="mi">🎥</span>Record video instead</button>
+
+          <span class="snip-sep"></span>
+
+          <div class="snip-dropdown" id="delayDropdown">
+            <button class="snip-btn" id="btnDelayMenu" type="button" aria-haspopup="true" title="Set a delay before capture">
+              <span class="mi" id="delayIcon">⏱</span><span id="delayLabel">No delay</span><span class="snip-caret">▾</span>
+            </button>
+            <div class="snip-menu" id="delayMenu" role="menu">
+              <button type="button" data-delay="0" class="active"><span class="mi">⏱</span>No delay</button>
+              <button type="button" data-delay="3"><span class="mi">⏱</span>3-second delay</button>
+              <button type="button" data-delay="5"><span class="mi">⏱</span>5-second delay</button>
+              <button type="button" data-delay="10"><span class="mi">⏱</span>10-second delay</button>
+            </div>
+          </div>
+
+          <button class="snip-btn" id="btnTextExtract" type="button" title="Text extractor — capture and pull the text out of it"><span class="mi">▤</span>Text extractor</button>
+
+          <span class="snip-sep" id="liveSep" style="display:none;"></span>
+          <span class="snip-btn" id="liveBadge" style="display:none; color:var(--accent); cursor:default;"><span class="mi">●</span><span id="liveBadgeLabel">Sharing active</span></span>
+          <button class="snip-btn" id="btnStopSharing" type="button" style="display:none; color:#F0928A;" title="Stop sharing your screen with this site">Stop sharing</button>
+        </div>
+
+        <div class="snip-stage" id="snipStage">
+          <div class="snip-hint" id="snipHint">
+            Click <b>+ New</b> above to start a snip<br>
+            <span style="opacity:.75;">Your browser will ask what to share the first time — after that, snip as many times as you like without being asked again.</span><br>
+            <span style="opacity:.75;">Shape: <b id="snipHintShape">Rectangle</b> · Delay: <b id="snipHintDelay">No delay</b></span>
+          </div>
+        </div>
+
+        <div class="studio-status" id="snipStatus"></div>
+
+        <div>
+          <div class="panel-label"><span>Your screenshots</span><span id="shotCount">0 in this session</span></div>
+          <div class="shot-grid" id="shotLibrary">
+            <div class="library-empty">Nothing captured yet — your first screenshot will show up here.</div>
           </div>
         </div>
       </div>
@@ -1730,6 +1765,8 @@
         <a href="#trust">Security</a>
         <a href="privacy.html">Privacy</a>
         <a href="terms.html">Terms</a>
+        <a href="refund.html">Refunds</a>
+        <a href="cancellation.html">Cancellation</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -1833,8 +1870,8 @@
   // Replace with your own project's values (Supabase Dashboard → Project Settings → API).
   // The anon key is meant to be public — real access control lives in Row Level Security
   // policies (see docs/supabase-schema.sql), not in keeping this key secret.
-  const SUPABASE_URL = 'https://iwctleyslwvdotzzvdsg.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_pnlStvNN01y5BuCUBIFxYQ_N2QBiHHp';
+  const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
+  const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
   const supabaseReady = !SUPABASE_URL.includes('YOUR-PROJECT') && typeof window.supabase !== 'undefined';
   const sb = supabaseReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
   let currentUser = null;
@@ -2004,6 +2041,7 @@
     });
   });
   btnGoVideo.addEventListener('click', ()=>{
+    if(window.__switchStudioTab) window.__switchStudioTab('videoStudio');
     document.getElementById('videoStudio').scrollIntoView({ behavior:'smooth', block:'start' });
   });
 
@@ -3666,6 +3704,52 @@
       el.innerHTML = `<span class="timer-badge ${cls}">⏱ ${formatCountdown(msLeft)}</span>`;
     });
   }, 1000);
+
+  // ---------- studio switcher (Recording / Screenshot tabs) ----------
+  // Full WAI-ARIA tabs pattern: aria-selected + roving tabindex + arrow-key navigation,
+  // so this is keyboard- and screen-reader-accessible, not just click-only.
+  (function initStudioSwitcher(){
+    const tabs = Array.from(document.querySelectorAll('#studioSwitcher .studio-tab'));
+    if(!tabs.length) return;
+
+    function panelFor(tab){
+      return document.getElementById(tab.getAttribute('aria-controls'));
+    }
+
+    function activate(tab, opts){
+      opts = opts || {};
+      tabs.forEach(t=>{
+        const isActive = t === tab;
+        t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        t.tabIndex = isActive ? 0 : -1;
+        const panel = panelFor(t);
+        if(panel) panel.classList.toggle('active', isActive);
+      });
+      if(opts.focus) tab.focus();
+    }
+
+    tabs.forEach((tab, i)=>{
+      tab.addEventListener('click', ()=> activate(tab));
+      tab.addEventListener('keydown', (e)=>{
+        let idx = null;
+        if(e.key === 'ArrowRight' || e.key === 'ArrowDown'){ idx = (i + 1) % tabs.length; }
+        else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ idx = (i - 1 + tabs.length) % tabs.length; }
+        else if(e.key === 'Home'){ idx = 0; }
+        else if(e.key === 'End'){ idx = tabs.length - 1; }
+        else { return; }
+        e.preventDefault();
+        activate(tabs[idx], { focus:true });
+      });
+    });
+
+    // Lets other controls on the page (e.g. "Record video instead" inside
+    // Screenshot studio) switch tabs programmatically instead of scrolling
+    // to a panel that's hidden behind the other tab.
+    window.__switchStudioTab = function(panelId){
+      const tab = tabs.find(t=> t.getAttribute('aria-controls') === panelId);
+      if(tab) activate(tab);
+    };
+  })();
 
   // ---------- product tour tabs ----------
   (function initTourTabs(){
