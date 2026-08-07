@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — FreeScreenRecording</title>
+<meta name="description" content="Contact Aaryan Softworks, the team behind FreeScreenRecording.">
+<link rel="canonical" href="https://freescreenrecording.net/contact.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0B10; --ink-2:#14171D; --paper:#F1EEE7; --paper-dim:#9B9890;
+    --accent:#2EAA8C; --line:rgba(241,238,231,0.12); --line-strong:rgba(241,238,231,0.22);
+    --max:820px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--ink); color:var(--paper); font-family:'Manrope',sans-serif; line-height:1.7; -webkit-font-smoothing:antialiased;}
+  a{color:var(--accent); text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 24px;}
+  header.nav{position:sticky; top:0; z-index:50; background:rgba(11,14,20,0.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--line);}
+  .nav-inner{display:flex; align-items:center; justify-content:space-between; max-width:1180px; margin:0 auto; padding:18px 32px;}
+  .logo{display:flex; align-items:center; gap:10px; font-family:'Instrument Serif',serif; font-weight:600; font-size:18px;}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);}
+  .back{font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--paper-dim);}
+  main{padding:64px 0 100px;}
+  h1{font-family:'Instrument Serif',serif; font-weight:500; font-size:clamp(32px,5vw,44px); letter-spacing:-0.015em; margin-bottom:8px;}
+  .sub{color:var(--paper-dim); font-size:15.5px; margin-bottom:44px; max-width:520px;}
+  h2{font-family:'Instrument Serif',serif; font-weight:500; font-size:20px; margin:0 0 14px; letter-spacing:-0.01em;}
+  p{color:var(--paper-dim); font-size:15px; margin-bottom:10px;}
+  strong{color:var(--paper);}
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:40px;}
+  @media (max-width:680px){ .grid{grid-template-columns:1fr;} }
+
+  .card{
+    border:1px solid var(--line-strong); border-radius:16px; background:var(--ink-2);
+    padding:26px 28px;
+  }
+  .card + .card{ margin-top:20px; }
+
+  .meta-row{ display:flex; gap:10px; align-items:flex-start; margin-bottom:14px; }
+  .meta-row:last-child{ margin-bottom:0; }
+  .meta-label{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--paper-dim);
+    text-transform:uppercase; letter-spacing:.04em; width:96px; flex:none; padding-top:2px;
+  }
+  .meta-value{ color:var(--paper); font-size:14.5px; }
+  .meta-value a{ color:var(--accent); }
+
+  .social-row{ display:flex; gap:12px; margin-top:18px; }
+  .social-pill{
+    display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border-radius:999px;
+    border:1px solid var(--line-strong); font-family:'Manrope',sans-serif; font-weight:600; font-size:13px;
+    color:var(--paper); transition:border-color .2s ease, color .2s ease;
+  }
+  .social-pill:hover{ border-color:var(--accent); color:var(--accent); text-decoration:none; }
+
+  form{ display:flex; flex-direction:column; gap:14px; }
+  label{ font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--paper-dim); text-transform:uppercase; letter-spacing:.04em; }
+  input, textarea{
+    background:var(--ink); border:1px solid var(--line-strong); border-radius:10px; color:var(--paper);
+    font-family:'Manrope',sans-serif; font-size:14.5px; padding:12px 14px; width:100%; resize:vertical;
+  }
+  input:focus, textarea:focus{ outline:none; border-color:var(--accent); }
+  textarea{ min-height:120px; }
+  button{
+    margin-top:4px; align-self:flex-start; background:var(--accent); color:var(--ink); border:none;
+    border-radius:999px; padding:12px 26px; font-family:'Manrope',sans-serif; font-weight:700; font-size:14.5px;
+    cursor:pointer;
+  }
+  button:hover{ opacity:.92; }
+  .form-note{ font-size:12.5px; color:var(--paper-dim); margin-top:2px; }
+
+  footer{border-top:1px solid var(--line); padding:28px 0; text-align:center; margin-top:60px;}
+  footer p{font-size:13px; color:var(--paper-dim); margin:0;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><span class="dot"></span>FreeScreenRecording</a>
+    <a href="index.html" class="back">← Back to site</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Contact us</h1>
+  <p class="sub">Questions, feedback, or something not working right? We usually reply within 24–48 hours.</p>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>Business details</h2>
+        <div class="meta-row">
+          <span class="meta-label">Operated by</span>
+          <span class="meta-value"><strong>Aaryan Softworks</strong></span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Udyam Reg. No.</span>
+          <span class="meta-value">UDYAM-MH-26-1194293</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Address</span>
+          <span class="meta-value">Kondhwa Budruk, Pune, Maharashtra 411048, India</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Email</span>
+          <span class="meta-value"><a href="mailto:aaryansoftworks@gmail.com">aaryansoftworks@gmail.com</a></span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Response time</span>
+          <span class="meta-value">Within 24–48 hours</span>
+        </div>
+
+        <div class="social-row">
+          <a class="social-pill" href="https://www.instagram.com/freescreenrecording/" target="_blank" rel="noopener">Instagram</a>
+          <a class="social-pill" href="https://www.facebook.com/profile.php?id=61592624894716" target="_blank" rel="noopener">Facebook</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Looking for something else?</h2>
+        <p>Refund or cancellation questions: see our <a href="refund.html">Refund Policy</a> and <a href="cancellation.html">Cancellation Policy</a>.</p>
+        <p>How we handle your data: see our <a href="privacy.html">Privacy Policy</a>.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Send a message</h2>
+      <form id="contactForm">
+        <div>
+          <label for="cf-name">Name</label>
+          <input type="text" id="cf-name" name="name" required>
+        </div>
+        <div>
+          <label for="cf-email">Email</label>
+          <input type="email" id="cf-email" name="email" required>
+        </div>
+        <div>
+          <label for="cf-message">Message</label>
+          <textarea id="cf-message" name="message" required></textarea>
+        </div>
+        <button type="submit">Send message</button>
+        <p class="form-note">This opens your email app with the message pre-filled to <strong>aaryansoftworks@gmail.com</strong> — nothing is sent from this page directly.</p>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 FreeScreenRecording · <a href="terms.html">Terms of Service</a> · <a href="privacy.html">Privacy Policy</a> · <a href="refund.html">Refund Policy</a> · <a href="cancellation.html">Cancellation Policy</a></p>
+</footer>
+
+<script>
+  document.getElementById('contactForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = document.getElementById('cf-name').value.trim();
+    var email = document.getElementById('cf-email').value.trim();
+    var message = document.getElementById('cf-message').value.trim();
+    var subject = encodeURIComponent('FreeScreenRecording contact form — ' + name);
+    var body = encodeURIComponent(message + '\n\n— ' + name + ' (' + email + ')');
+    window.location.href = 'mailto:aaryansoftworks@gmail.com?subject=' + subject + '&body=' + body;
+  });
+</script>
+
+</body>
+</html>
