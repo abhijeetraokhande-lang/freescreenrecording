@@ -3595,7 +3595,9 @@
         throw new Error('Your unlock has expired. Please unlock again.');
       }
       if(!resp.ok){
-        throw new Error('server responded with status ' + resp.status);
+        let detail = '';
+        try{ const errBody = await resp.json(); detail = errBody.detail || errBody.error || ''; }catch(e){}
+        throw new Error('server responded with status ' + resp.status + (detail ? ' — ' + detail : ''));
       }
       const data = await resp.json();
       summaryBox.className = 'summary-box filled';
