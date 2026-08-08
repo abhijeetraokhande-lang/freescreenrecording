@@ -42,6 +42,11 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'No transcript provided' }) };
   }
 
+  if (!process.env.OPENROUTER_API_KEY) {
+    console.error('summarize error: OPENROUTER_API_KEY is not set');
+    return { statusCode: 500, body: JSON.stringify({ error: 'Server is missing its AI provider key' }) };
+  }
+
   try {
     const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -50,7 +55,11 @@ exports.handler = async (event) => {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-exp:free',
+        // "openrouter/free" auto-routes to whichever free model is currently
+        // available, so this doesn't rot every time a provider retires or
+        // renames a specific free experimental model (which is what broke
+        // this — google/gemini-2.0-flash-exp:free no longer exists).
+        model: 'openrouter/free',
         messages: [
           {
             role: 'user',
@@ -63,7 +72,11 @@ exports.handler = async (event) => {
     if (!resp.ok) {
       const errText = await resp.text();
       console.error('OpenRouter API error:', resp.status, errText);
-      return { statusCode: 502, body: JSON.stringify({ error: 'AI provider error' }) };
+      // Pass the real upstream status through (falling back to 502 only if
+      // OpenRouter didn't give us a sensible one) instead of always saying
+      // 502 — so the next failure is diagnosable from the client error alone.
+      const statusCode = resp.status >= 400 && resp.status < 600 ? resp.status : 502;
+      return { statusCode, body: JSON.stringify({ error: 'AI provider error', detail: errText.slice(0, 300) }) };
     }
 
     const data = await resp.json();
